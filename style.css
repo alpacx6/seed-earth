@@ -266,3 +266,81 @@ body{
   opacity:0;
   color: rgba(255,255,255,.72);
 }
+
+/* ===============================
+   UI ROLLBACK (이전 느낌 복원)
+   =============================== */
+
+/* 전체 톤 */
+body {
+  background: #0e0f14;
+  color: #e8f0ff;
+}
+
+/* HUD */
+.hud {
+  background: linear-gradient(180deg, #111a2b, #0b1020);
+  border-right: 2px solid rgba(120,160,255,.25);
+  box-shadow: inset -4px 0 12px rgba(0,0,0,.5);
+}
+
+.hudBox {
+  background: rgba(0,0,0,.35);
+  border: 1px solid rgba(120,160,255,.25);
+  border-radius: 12px;
+}
+
+.hudBox .row {
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+/* 카드 */
+.overlayPanel {
+  background: linear-gradient(180deg, #0c1224, #070b18);
+  border: 1px solid rgba(120,160,255,.35);
+  box-shadow: 0 20px 60px rgba(0,0,0,.6);
+}
+
+.card {
+  background: linear-gradient(180deg, #141d3a, #0b1226);
+  border: 2px solid rgba(120,160,255,.35);
+  border-radius: 14px;
+}
+
+.card.rare {
+  border-color: #8fd3ff;
+  box-shadow: 0 0 18px rgba(140,210,255,.6);
+}
+
+.card.legend {
+  border-color: #ffd36a;
+  box-shadow: 0 0 26px rgba(255,210,100,.7);
+}
+
+/* 대화창 */
+.dialogue {
+  background: linear-gradient(180deg, #0b1020, #070b18);
+  border: 2px solid rgba(120,160,255,.35);
+  box-shadow: 0 30px 80px rgba(0,0,0,.7);
+}
+
+.dlgName {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.dlgText {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* 버튼 */
+.btn {
+  background: linear-gradient(180deg, #1a254a, #0e1530);
+  border: 1px solid rgba(120,160,255,.4);
+  color: #e8f0ff;
+}
+
+.btn:hover {
+  background: linear-gradient(180deg, #22306a, #141e46);
+}
