@@ -10,6 +10,31 @@ const BASE_URL = new URL('.', import.meta.url);
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
+// ===== 배경 이미지 프리로드 =====
+const BG_CACHE = new Map();
+
+async function preloadStageBackgrounds(){
+  const list = STAGES.map(s => s.bgImage).filter(Boolean);
+  const uniq = [...new Set(list)];
+
+  await Promise.all(
+    uniq.map(rel => new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        BG_CACHE.set(rel, img);
+        resolve();
+      };
+      img.onerror = () => {
+        console.warn("BG load fail:", rel);
+        resolve();
+      };
+
+      // ✅ GitHub Pages + module 안전 경로
+      img.src = new URL(rel, BASE_URL).href;
+    }))
+  );
+}
+
 const W = canvas.width, H = canvas.height;
 
 const overlay = document.getElementById("cardOverlay");
