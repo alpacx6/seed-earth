@@ -167,7 +167,7 @@ function resolveAsset(rel){
 }
 
 function setSpeakerUI(name){
-  const s = SPEAKERS[name] || { role:"SYSTEM", color:"#cfe1ff", avatar:"avatars/known_avatar.png" };
+  const s = SPEAKERS[name] || { role:"SYSTEM", color:"#cfe1ff", avatar:"avatars/unknown_avatar.png" };
 
   dlgNameEl.textContent = name || "???";
   dlgRoleEl.textContent = s.role;
@@ -177,7 +177,7 @@ function setSpeakerUI(name){
   dlgAvatar.style.borderColor = `${s.color}55`;
 
   // ✅ avatar도 GitHub Pages 안전 경로
-  dlgAvatar.src = resolveAsset(s.avatar || "avatars/known_avatar.png");
+  dlgAvatar.src = resolveAsset(s.avatar || "avatars/unknown_avatar.png");
 }
 
 function setAutoBtn(){ dlgAutoBtn.textContent = `AUTO: ${dlgAuto ? "ON" : "OFF"}`; }
