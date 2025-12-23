@@ -5,7 +5,8 @@ import { SPEAKERS, INTRO_DIALOGUE, END_DIALOGUE, stageEnterDialogue } from "./di
 console.log("game.js LOADED (Stage7 + Rules + New Story)");
 
 // ✅ module 기준 base url (GitHub Pages 경로 꼬임 방지)
-const BASE_URL = new URL(".", import.meta.url);
+const BASE_URL = new URL('.', import.meta.url);
+
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -1292,7 +1293,7 @@ async function runIntroAndStart(){
   await preloadStageBackgrounds();
 
   // 플레이어 이미지
-  player.image.src = "robot.png";
+  player.image.src = new URL("robot.png", BASE_URL).href;
   player.image.onload = () => {
     player.imgWidth = player.image.width;
     player.imgHeight = player.image.height;
