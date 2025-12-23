@@ -2,39 +2,12 @@
 import { baseStages7, rand } from "./stages.js";
 import { SPEAKERS, INTRO_DIALOGUE, END_DIALOGUE, stageEnterDialogue } from "./dialogue.js";
 
-console.log("game.js LOADED (Stage7 + Rules + New Story)");
+console.log("game.js LOADED (FINAL)");
 
-// ✅ module 기준 base url (GitHub Pages 경로 꼬임 방지)
-const BASE_URL = new URL('.', import.meta.url);
-
+const BASE_URL = new URL("./", import.meta.url); // ✅ 모든 경로를 여기 기준으로 안전하게
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
-// ===== 배경 이미지 프리로드 =====
-const BG_CACHE = new Map();
-
-async function preloadStageBackgrounds(){
-  const list = STAGES.map(s => s.bgImage).filter(Boolean);
-  const uniq = [...new Set(list)];
-
-  await Promise.all(
-    uniq.map(rel => new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => {
-        BG_CACHE.set(rel, img);
-        resolve();
-      };
-      img.onerror = () => {
-        console.warn("BG load fail:", rel);
-        resolve();
-      };
-
-      // ✅ GitHub Pages + module 안전 경로
-      img.src = new URL(rel, BASE_URL).href;
-    }))
-  );
-}
-
 const W = canvas.width, H = canvas.height;
 
 const overlay = document.getElementById("cardOverlay");
@@ -69,21 +42,21 @@ const uiTotal = document.getElementById("total");
 const uiScore = document.getElementById("score");
 const uiHint = document.getElementById("hint");
 
-const BG_CACHE = new Map();
-
+// ====== utils ======
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 function overlap(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
 function open(el){ el.classList.add("is-open"); }
 function close(el){ el.classList.remove("is-open"); }
 function setHint(msg){ uiHint.textContent = msg || ""; }
 
+// ====== stage rule box ======
 function setStageRuleBox(stage){
   if (!stage?.ruleText) { stageRuleOverlay.classList.remove("is-on"); return; }
   stageRuleOverlay.innerHTML = `<span class="tag">RULE</span>${stage.ruleText}`;
   stageRuleOverlay.classList.add("is-on");
 }
 
-// ====== 루프 제어 ======
+// ====== loop control ======
 let running = false;
 let lastT = 0;
 let rafId = null;
@@ -100,7 +73,7 @@ function startLoop() {
   rafId = requestAnimationFrame(loop);
 }
 
-// ====== 입력 ======
+// ====== input ======
 const held = new Set();
 const pressed = new Set();
 addEventListener("keydown", (e) => {
@@ -113,7 +86,7 @@ addEventListener("keyup", (e) => held.delete(e.code));
 function wasPressed(code) { if (pressed.has(code)) { pressed.delete(code); return true; } return false; }
 function isHeld(code){ return held.has(code); }
 
-// ====== 물리/월드 ======
+// ====== world / physics ======
 const GRAV = 0.85;
 const GROUND_Y = 440;
 
@@ -121,7 +94,7 @@ const platforms = [];
 const hazards = [];
 const seeds = [];
 const plots = [];
-const tornados = []; // ✅ stage4 회오리
+const tornados = [];
 
 const world = {
   camX: 0,
@@ -151,7 +124,6 @@ const player = {
   jumpsMax: 1,
   extraJumpUsed: false,
 
-  // ✅ 상태이상/스테이지 규칙용
   toxicMs: 0,
   toxicTickAcc: 0,
 
@@ -178,7 +150,7 @@ const player = {
 function getMaxHp(){ return player.maxHpBase + player.maxHpBonus; }
 function getMaxO2(){ return player.maxO2Base + player.maxO2Bonus; }
 
-// ====== 대화 시스템 ======
+// ====== dialogue system ======
 let dlgActive = false;
 let dlgLines = [];
 let dlgIdx = 0;
@@ -188,8 +160,12 @@ let dlgOnDone = () => {};
 let typingTimer = null;
 let autoTimer = null;
 
+function resolveAsset(rel){
+  return new URL(rel, BASE_URL).href;
+}
+
 function setSpeakerUI(name){
-  const s = SPEAKERS[name] || { role:"SYSTEM", color:"#cfe1ff", avatar:null };
+  const s = SPEAKERS[name] || { role:"SYSTEM", color:"#cfe1ff", avatar:"avatars/unknown_avatar.png" };
 
   dlgNameEl.textContent = name || "???";
   dlgRoleEl.textContent = s.role;
@@ -198,13 +174,10 @@ function setSpeakerUI(name){
   dlgAvatar.style.boxShadow = `0 12px 26px rgba(0,0,0,.35), 0 0 30px ${s.color}33`;
   dlgAvatar.style.borderColor = `${s.color}55`;
 
-  // ✅ 이미지 칸
-  if (s.avatar){
-    dlgAvatar.src = s.avatar;
-  } else {
-    dlgAvatar.src = "avatars/unknown_avatar.png";
-  }
+  // ✅ avatar도 GitHub Pages 안전 경로
+  dlgAvatar.src = resolveAsset(s.avatar || "avatars/unknown_avatar.png");
 }
+
 function setAutoBtn(){ dlgAutoBtn.textContent = `AUTO: ${dlgAuto ? "ON" : "OFF"}`; }
 
 function openDialogue(lines, onDone){
@@ -303,7 +276,7 @@ addEventListener("keydown", (e)=>{
   }
 });
 
-// ====== 로딩 문구 ======
+// ====== loading quotes ======
 const LOADING_QUOTES = [
   "당신의 선택이 지구의 내일을 바꿉니다.",
   "오염은 빠르고, 회복은 느립니다. 그래서 지금이 중요합니다.",
@@ -318,7 +291,7 @@ async function showLoadingLine(){
   close(loading);
 }
 
-// ====== 카드 시스템 ======
+// ====== cards ======
 const RARITY = {
   common:    { name:"일반",      w:0.60, cls:"r-common" },
   rare:      { name:"레어",      w:0.27, cls:"r-rare" },
@@ -360,6 +333,7 @@ const CARD_DEFS = [
 
   { id:"double_jump", rarity:"legendary", name:"더블 점프!", emoji:"🦘", desc:"공중 점프 1회 추가", type:"double_jump" },
 ];
+
 function defById(id){ return CARD_DEFS.find(c=>c.id===id); }
 
 function renderOwnedCards(){
@@ -510,7 +484,7 @@ function autoChooseCard(){
   chooseCard(idx);
 }
 
-// ====== ✅ 스테이지 ======
+// ====== stages ======
 const STAGES = baseStages7();
 let currentStageIndex = 0;
 
@@ -527,7 +501,7 @@ function syncHud(){
   uiScore.textContent = String(player.score);
 }
 
-// 발판 높이 보정
+// 발판 높이
 function getSurfaceY(targetX) {
   let bestY = GROUND_Y;
   for (const p of platforms) {
@@ -573,7 +547,6 @@ function buildStage(stageIndex){
     });
   });
 
-  // ✅ Stage4 회오리 생성
   if (S.windZones?.count){
     for (let i=0;i<S.windZones.count;i++){
       const x = rand(600, world.length-400);
@@ -600,7 +573,6 @@ function resetPlayerForStage(keepScore=true){
   player.invulnMs = 0;
   player.extraJumpUsed = false;
 
-  // ✅ 상태 초기화
   player.toxicMs = 0; player.toxicTickAcc = 0;
   player.stunMs = 0; player.slowMs = 0;
   player.freezeMs = 0;
@@ -692,7 +664,70 @@ function getTotalSpeedMultiplier(){
   return getCardSpeedMultiplier() * getStageSpeedMultiplier() * getDebuffSpeedMultiplier();
 }
 
-// ====== 메인 루프 ======
+// ====== background preload/draw (핵심!) ======
+const BG_CACHE = new Map();
+
+async function preloadStageBackgrounds(){
+  const list = STAGES.map(s => s.bgImage).filter(Boolean);
+  const uniq = [...new Set(list)];
+
+  await Promise.all(
+    uniq.map(rel => new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => { BG_CACHE.set(rel, img); resolve(); };
+      img.onerror = () => { console.warn("BG load fail:", rel); resolve(); };
+
+      // ✅ 무조건 seed-earth/ 기준으로 안전하게 로드됨
+      img.src = resolveAsset(rel);
+    }))
+  );
+}
+
+function drawBackground(stage){
+  const rel = stage?.bgImage;
+  const img = rel ? BG_CACHE.get(rel) : null;
+
+  if (img && img.complete && img.naturalWidth > 0){
+    ctx.drawImage(img, 0, 0, W, H);
+    return;
+  }
+
+  // fallback gradient
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  const tone = stage?.bg?.theme || "default";
+  switch(tone){
+    case "desert":
+    case "dryriver":
+    case "sandstorm":
+      g.addColorStop(0, "rgb(255,185,95)");
+      g.addColorStop(1, "rgb(205,125,55)");
+      break;
+    case "toxiccity":
+      g.addColorStop(0, "rgb(120,90,160)");
+      g.addColorStop(1, "rgb(40,35,70)");
+      break;
+    case "snow":
+      g.addColorStop(0, "rgb(200,225,255)");
+      g.addColorStop(1, "rgb(60,90,130)");
+      break;
+    default:
+      g.addColorStop(0, "rgb(60,60,90)");
+      g.addColorStop(1, "rgb(20,20,40)");
+  }
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,W,H);
+
+  if (rel && !img){
+    ctx.save();
+    ctx.fillStyle = "rgba(255,255,255,0.75)";
+    ctx.font = "14px system-ui";
+    ctx.textAlign = "center";
+    ctx.fillText("배경 로딩 중…", W/2, H/2);
+    ctx.restore();
+  }
+}
+
+// ====== main loop ======
 function loop(t){
   if (!running) return;
   const dt = Math.min(32, t - lastT);
@@ -726,7 +761,6 @@ function update(dt){
 
   const S = STAGES[currentStageIndex];
 
-  // ====== 카드: 주기 O2 ======
   if (upgrade.periodicO2){
     upgrade.periodicTimer += dt;
     if (upgrade.periodicTimer >= 3000){
@@ -736,7 +770,6 @@ function update(dt){
     }
   }
 
-  // ====== 기본 산소 감소 ======
   player.o2 -= (2.0 * dt / 1000);
   if (player.o2 < 0) player.o2 = 0;
 
@@ -753,7 +786,6 @@ function update(dt){
     warnOverlay.classList.remove("is-on");
   }
 
-  // ====== ✅ Stage6 산성비 ======
   if (S?.acidRain){
     player.acidCycleMs += dt;
     const cycle = S.acidRain.onMs + S.acidRain.offMs;
@@ -762,9 +794,8 @@ function update(dt){
 
     if (player.acidOn){
       player.acidDmgAcc += dt;
-      const perMs = 1000;
-      while (player.acidDmgAcc >= perMs){
-        player.acidDmgAcc -= perMs;
+      while (player.acidDmgAcc >= 1000){
+        player.acidDmgAcc -= 1000;
         player.hp = clamp(player.hp - S.acidRain.dps, 0, getMaxHp());
       }
     } else {
@@ -774,7 +805,6 @@ function update(dt){
     player.acidOn = false;
   }
 
-  // ====== ✅ Stage7 빙결 ======
   if (S?.snow){
     if (player.nextFreezeMs > 0){
       player.nextFreezeMs -= dt;
@@ -786,7 +816,6 @@ function update(dt){
     }
   }
 
-  // 디버프 타이머
   if (player.stunMs > 0) player.stunMs -= dt;
   if (player.slowMs > 0) player.slowMs -= dt;
   if (player.freezeMs > 0) player.freezeMs -= dt;
@@ -794,7 +823,6 @@ function update(dt){
   if (player.slowMs < 0) player.slowMs = 0;
   if (player.freezeMs < 0) player.freezeMs = 0;
 
-  // ====== 입력 ======
   const left  = isHeld("ArrowLeft") || isHeld("KeyA");
   const right = isHeld("ArrowRight") || isHeld("KeyD");
   const jumpPressed  = wasPressed("Space") || wasPressed("ArrowUp") || wasPressed("KeyW");
@@ -837,7 +865,7 @@ function update(dt){
   player.y += player.vy;
   player.x = clamp(player.x, 0, world.length - player.w);
 
-  // ====== 충돌 ======
+  // collisions
   player.onGround = false;
   let stoodPlatform = null;
 
@@ -863,7 +891,7 @@ function update(dt){
     }
   }
 
-  // ====== ✅ Stage3 독성 발판 DOT ======
+  // stage3 toxic platform DOT
   if (stoodPlatform?.toxic){
     player.toxicMs = Math.max(player.toxicMs, 3000);
   }
@@ -881,7 +909,7 @@ function update(dt){
     }
   }
 
-  // ====== 씨앗 획득 ======
+  // seed pickup
   for (const s of seeds){
     if (s.taken) continue;
     if (overlap({x:player.x,y:player.y,w:player.w,h:player.h}, {x:s.x,y:s.y,w:s.w,h:s.h})){
@@ -892,7 +920,7 @@ function update(dt){
     }
   }
 
-  // ====== 심기/물주기 ======
+  // plant / water
   if (plantPressed && player.plantCooldownMs <= 0 && canAct){
     for (const pl of plots){
       if (pl.planted) continue;
@@ -943,7 +971,7 @@ function update(dt){
     if (pl.planted && !pl.watered) pl.plantMs += dt;
   }
 
-  // ====== 위험물(가시/독성 구체) ======
+  // hazards
   for (const h of hazards){
     if (h.kind === "orb"){
       const speedMul = 1 + currentStageIndex*0.18;
@@ -978,7 +1006,7 @@ function update(dt){
     }
   }
 
-  // ====== ✅ Stage4 회오리 충돌 ======
+  // stage4 tornado
   for (const tw of tornados){
     tw.t += dt * 0.002;
     const wobble = Math.sin(tw.t) * 10;
@@ -993,7 +1021,7 @@ function update(dt){
     }
   }
 
-  // 사망
+  // death
   if (player.hp <= 0){
     player.hp = 0;
     stopLoop();
@@ -1010,7 +1038,7 @@ function update(dt){
 
   world.camX = clamp(player.x - W*0.35, 0, world.length - W);
 
-  // 식물 O2 회복
+  // plant O2 gain
   for (const pl of plots){
     if (!pl.planted) continue;
     if (!pl.watered) { pl.holdMs = 0; continue; }
@@ -1030,7 +1058,7 @@ function update(dt){
     } else pl.holdMs = 0;
   }
 
-  // 클리어
+  // clear
   if (player.planted >= plots.length){
     stopLoop();
     if (currentStageIndex < STAGES.length - 1){
@@ -1056,7 +1084,7 @@ function update(dt){
   syncHud();
 }
 
-// ====== 렌더링 ======
+// ====== rendering helpers ======
 function drawPulseRing(cx, cy, baseR, t, strokeA, strokeB){
   const p = (Math.sin(t) + 1)/2;
   const r = baseR + p*6;
@@ -1082,69 +1110,6 @@ function drawTextTag(x, y, text){
   ctx.restore();
 }
 
-// ✅ 배경 그리기 (이미지 우선, 실패시 테마 그라데이션)
-function drawBackground(stage){
-  const src = stage?.bgImage;
-  const img = src ? BG_CACHE.get(src) : null;
-
-  if (img && img.complete && img.naturalWidth > 0){
-    ctx.drawImage(img, 0, 0, W, H);
-    return;
-  }
-
-  const tone = stage?.bgTone ?? stage?.bg?.theme;
-  const g = ctx.createLinearGradient(0, 0, 0, H);
-
-  switch(tone){
-    case "desert":
-    case "dryriver":
-    case "sandstorm":
-      g.addColorStop(0, "rgb(255,185,95)");
-      g.addColorStop(1, "rgb(205,125,55)");
-      break;
-    case "toxic":
-    case "toxiccity":
-    case "labruin":
-    case "acidtown":
-      g.addColorStop(0, "rgb(120,90,160)");
-      g.addColorStop(1, "rgb(40,35,70)");
-      break;
-    case "snow":
-      g.addColorStop(0, "rgb(200,225,255)");
-      g.addColorStop(1, "rgb(60,90,130)");
-      break;
-    default:
-      g.addColorStop(0, "rgb(60,60,90)");
-      g.addColorStop(1, "rgb(20,20,40)");
-  }
-
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, W, H);
-
-  ctx.save();
-  ctx.fillStyle = "rgba(255,255,255,0.72)";
-  ctx.font = "14px system-ui";
-  ctx.fillText(`BG missing: ${src || "(none)"}`, 18, 28);
-  ctx.restore();
-}
-
-// ✅ GitHub Pages에서도 100% 되는 프리로드
-function preloadStageBackgrounds(){
-  const list = STAGES.map(s => s.bgImage).filter(Boolean);
-  const uniq = [...new Set(list)];
-
-  return Promise.all(
-    uniq.map(src => new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => { BG_CACHE.set(src, img); resolve(); };
-      img.onerror = () => { console.warn("BG load fail:", src); resolve(); };
-
-      // 🔥 핵심: module 기준 경로 고정
-      img.src = new URL(src, BASE_URL).href;
-    }))
-  );
-}
-
 function render(){
   ctx.clearRect(0,0,W,H);
   const S = STAGES[currentStageIndex] || STAGES[0];
@@ -1156,7 +1121,7 @@ function render(){
     ctx.fillRect(0,0,W,H);
   }
 
-  // 산성비 overlay
+  // acid overlay
   if (player.acidOn){
     ctx.save();
     ctx.globalAlpha = 0.18;
@@ -1169,7 +1134,7 @@ function render(){
     ctx.restore();
   }
 
-  // 빙결 overlay
+  // freeze overlay
   if (player.freezeMs > 0){
     ctx.save();
     ctx.globalAlpha = 0.18;
@@ -1181,6 +1146,7 @@ function render(){
   ctx.save();
   ctx.translate(-world.camX, 0);
 
+  // platforms
   for (const p of platforms){
     if (p.type==="ground"){
       ctx.fillStyle = "rgba(120,78,35,0.65)";
@@ -1201,7 +1167,7 @@ function render(){
     }
   }
 
-  // 씨앗
+  // seeds (simple)
   ctx.fillStyle = "rgba(255,255,255,0.9)";
   for (const s of seeds){
     if (s.taken) continue;
@@ -1213,7 +1179,7 @@ function render(){
     ctx.fillStyle = "rgba(255,255,255,0.9)";
   }
 
-  // 심는 자리
+  // plots
   const time = performance.now()*0.004;
   for (const pl of plots){
     ctx.fillStyle="rgba(20,16,10,0.65)";
@@ -1235,7 +1201,7 @@ function render(){
     }
   }
 
-  // 위험물
+  // hazards
   for (const h of hazards){
     if (h.kind==="spike"){
       ctx.fillStyle="rgba(255,90,90,0.85)";
@@ -1255,7 +1221,7 @@ function render(){
     }
   }
 
-  // ✅ 회오리
+  // tornados
   for (const tw of tornados){
     const wobble = Math.sin(tw.t) * 10;
     const x = tw.x + wobble;
@@ -1271,7 +1237,7 @@ function render(){
     ctx.restore();
   }
 
-  // 플레이어 (이미지)
+  // player sprite
   const blink = player.invulnMs > 0 && Math.floor(performance.now()/80)%2===0;
   ctx.globalAlpha = blink ? 0.35 : 1;
 
@@ -1285,6 +1251,7 @@ function render(){
   ctx.save();
   ctx.translate(dx + dWidth / 2, dy + dHeight / 2);
   ctx.scale(player.direction, 1);
+
   if (player.image.complete && player.image.naturalWidth > 0){
     ctx.drawImage(player.image, -dWidth / 2, -dHeight / 2, dWidth, dHeight);
   } else {
@@ -1292,12 +1259,12 @@ function render(){
     ctx.fillRect(-dWidth/2, -dHeight/2, dWidth, dHeight);
   }
   ctx.restore();
-  ctx.globalAlpha = 1;
 
+  ctx.globalAlpha = 1;
   ctx.restore();
 }
 
-// ====== 시작 ======
+// ====== start ======
 async function runIntroAndStart(){
   resetAllGameState();
   openDialogue(INTRO_DIALOGUE, async () => {
@@ -1309,16 +1276,17 @@ async function runIntroAndStart(){
   });
 }
 
-// ✅ boot (await 가능하게 async IIFE로)
+// ====== BOOT (async 필수) ======
 (async function boot(){
   close(overlay);
   close(loading);
   close(dialogue);
 
+  // ✅ 배경 먼저 전부 프리로드 (이게 배경 PNG 문제를 끝내는 핵심)
   await preloadStageBackgrounds();
 
-  // 플레이어 이미지
-  player.image.src = new URL("robot.png", BASE_URL).href;
+  // ✅ 플레이어 이미지도 안전 경로
+  player.image.src = resolveAsset("robot.png");
   player.image.onload = () => {
     player.imgWidth = player.image.width;
     player.imgHeight = player.image.height;
