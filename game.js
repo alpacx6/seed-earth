@@ -4,6 +4,9 @@ import { SPEAKERS, INTRO_DIALOGUE, END_DIALOGUE, stageEnterDialogue } from "./di
 
 console.log("game.js LOADED (Stage7 + Rules + New Story)");
 
+// ✅ module 기준 base url (GitHub Pages 경로 꼬임 방지)
+const BASE_URL = new URL(".", import.meta.url);
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const W = canvas.width, H = canvas.height;
@@ -159,7 +162,6 @@ let dlgOnDone = () => {};
 let typingTimer = null;
 let autoTimer = null;
 
-// ✅ 아바타 이미지를 사용하는 버전 (중복/깨진 코드 전부 제거)
 function setSpeakerUI(name){
   const s = SPEAKERS[name] || { role:"SYSTEM", color:"#cfe1ff", avatar:null };
 
@@ -170,9 +172,13 @@ function setSpeakerUI(name){
   dlgAvatar.style.boxShadow = `0 12px 26px rgba(0,0,0,.35), 0 0 30px ${s.color}33`;
   dlgAvatar.style.borderColor = `${s.color}55`;
 
-  dlgAvatar.src = s.avatar ? s.avatar : "avatars/unknown_avatar.png";
+  // ✅ 이미지 칸
+  if (s.avatar){
+    dlgAvatar.src = s.avatar;
+  } else {
+    dlgAvatar.src = "avatars/unknown_avatar.png";
+  }
 }
-
 function setAutoBtn(){ dlgAutoBtn.textContent = `AUTO: ${dlgAuto ? "ON" : "OFF"}`; }
 
 function openDialogue(lines, onDone){
@@ -481,96 +487,6 @@ function autoChooseCard(){
 // ====== ✅ 스테이지 ======
 const STAGES = baseStages7();
 let currentStageIndex = 0;
-
-// ====== 배경 프리로드/렌더 ======
-function preloadStageBackgrounds(){
-  const list = STAGES.map(s => s.bgImage).filter(Boolean);
-  const uniq = [...new Set(list)];
-  return Promise.all(
-    uniq.map(src => new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => { BG_CACHE.set(src, img); resolve(); };
-      img.onerror = () => { console.warn("BG load fail:", src); resolve(); }; // 실패해도 진행
-      img.src = src;
-    }))
-  );
-}
-
-function drawBackground(stage){
-  const src = stage?.bgImage;
-  const img = src ? BG_CACHE.get(src) : null;
-
-  if (img && img.complete && img.naturalWidth > 0){
-    ctx.drawImage(img, 0, 0, W, H);
-    return;
-  }
-
-  const tone = stage?.bgTone ?? stage?.bg?.theme;
-
-  const g = ctx.createLinearGradient(0, 0, 0, H);
-  switch(tone){
-    case "desert":
-    case "dryriver":
-    case "sandstorm":
-      g.addColorStop(0, "rgb(255,185,95)");
-      g.addColorStop(1, "rgb(205,125,55)");
-      break;
-    case "toxic":
-    case "toxiccity":
-    case "labruin":
-    case "acidtown":
-      g.addColorStop(0, "rgb(120,90,160)");
-      g.addColorStop(1, "rgb(40,35,70)");
-      break;
-    case "snow":
-      g.addColorStop(0, "rgb(200,225,255)");
-      g.addColorStop(1, "rgb(60,90,130)");
-      break;
-    default:
-      g.addColorStop(0, "rgb(60,60,90)");
-      g.addColorStop(1, "rgb(20,20,40)");
-  }
-
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, W, H);
-
-  ctx.save();
-  ctx.fillStyle = "rgba(255,255,255,0.75)";
-  ctx.font = "14px system-ui";
-  ctx.fillText(`BG missing: ${src || "(none)"}`, 18, 28);
-  ctx.restore();
-}
-
-
-  // 백업 배경
-  const g = ctx.createLinearGradient(0, 0, 0, H);
-  switch(stage?.bgTone){
-    case "desert":
-      g.addColorStop(0, "rgb(255,185,95)");
-      g.addColorStop(1, "rgb(205,125,55)");
-      break;
-    case "toxic":
-      g.addColorStop(0, "rgb(120,90,160)");
-      g.addColorStop(1, "rgb(40,35,70)");
-      break;
-    case "snow":
-      g.addColorStop(0, "rgb(200,225,255)");
-      g.addColorStop(1, "rgb(60,90,130)");
-      break;
-    default:
-      g.addColorStop(0, "rgb(60,60,90)");
-      g.addColorStop(1, "rgb(20,20,40)");
-  }
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, W, H);
-
-  // 디버그 텍스트 (원인 찾기)
-  ctx.save();
-  ctx.fillStyle = "rgba(255,255,255,0.75)";
-  ctx.font = "14px system-ui";
-  ctx.fillText(`BG missing: ${src || "(none)"}`, 18, 28);
-  ctx.restore();
-}
 
 // HUD
 function syncHud(){
@@ -1140,6 +1056,69 @@ function drawTextTag(x, y, text){
   ctx.restore();
 }
 
+// ✅ 배경 그리기 (이미지 우선, 실패시 테마 그라데이션)
+function drawBackground(stage){
+  const src = stage?.bgImage;
+  const img = src ? BG_CACHE.get(src) : null;
+
+  if (img && img.complete && img.naturalWidth > 0){
+    ctx.drawImage(img, 0, 0, W, H);
+    return;
+  }
+
+  const tone = stage?.bgTone ?? stage?.bg?.theme;
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+
+  switch(tone){
+    case "desert":
+    case "dryriver":
+    case "sandstorm":
+      g.addColorStop(0, "rgb(255,185,95)");
+      g.addColorStop(1, "rgb(205,125,55)");
+      break;
+    case "toxic":
+    case "toxiccity":
+    case "labruin":
+    case "acidtown":
+      g.addColorStop(0, "rgb(120,90,160)");
+      g.addColorStop(1, "rgb(40,35,70)");
+      break;
+    case "snow":
+      g.addColorStop(0, "rgb(200,225,255)");
+      g.addColorStop(1, "rgb(60,90,130)");
+      break;
+    default:
+      g.addColorStop(0, "rgb(60,60,90)");
+      g.addColorStop(1, "rgb(20,20,40)");
+  }
+
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.save();
+  ctx.fillStyle = "rgba(255,255,255,0.72)";
+  ctx.font = "14px system-ui";
+  ctx.fillText(`BG missing: ${src || "(none)"}`, 18, 28);
+  ctx.restore();
+}
+
+// ✅ GitHub Pages에서도 100% 되는 프리로드
+function preloadStageBackgrounds(){
+  const list = STAGES.map(s => s.bgImage).filter(Boolean);
+  const uniq = [...new Set(list)];
+
+  return Promise.all(
+    uniq.map(src => new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => { BG_CACHE.set(src, img); resolve(); };
+      img.onerror = () => { console.warn("BG load fail:", src); resolve(); };
+
+      // 🔥 핵심: module 기준 경로 고정
+      img.src = new URL(src, BASE_URL).href;
+    }))
+  );
+}
+
 function render(){
   ctx.clearRect(0,0,W,H);
   const S = STAGES[currentStageIndex] || STAGES[0];
@@ -1266,7 +1245,7 @@ function render(){
     ctx.restore();
   }
 
-  // 플레이어
+  // 플레이어 (이미지)
   const blink = player.invulnMs > 0 && Math.floor(performance.now()/80)%2===0;
   ctx.globalAlpha = blink ? 0.35 : 1;
 
@@ -1280,14 +1259,12 @@ function render(){
   ctx.save();
   ctx.translate(dx + dWidth / 2, dy + dHeight / 2);
   ctx.scale(player.direction, 1);
-
   if (player.image.complete && player.image.naturalWidth > 0){
     ctx.drawImage(player.image, -dWidth / 2, -dHeight / 2, dWidth, dHeight);
   } else {
     ctx.fillStyle = "rgba(120,255,180,0.9)";
     ctx.fillRect(-dWidth/2, -dHeight/2, dWidth, dHeight);
   }
-
   ctx.restore();
   ctx.globalAlpha = 1;
 
@@ -1306,7 +1283,7 @@ async function runIntroAndStart(){
   });
 }
 
-// ✅ await 때문에 반드시 async boot
+// ✅ boot (await 가능하게 async IIFE로)
 (async function boot(){
   close(overlay);
   close(loading);
@@ -1314,8 +1291,12 @@ async function runIntroAndStart(){
 
   await preloadStageBackgrounds();
 
+  // 플레이어 이미지
   player.image.src = "robot.png";
-  player.image.onload = () => { player.imgWidth = player.image.width; player.imgHeight = player.image.height; };
+  player.image.onload = () => {
+    player.imgWidth = player.image.width;
+    player.imgHeight = player.image.height;
+  };
 
   openDialogue(
     [
