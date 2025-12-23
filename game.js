@@ -178,10 +178,23 @@ let typingTimer = null;
 let autoTimer = null;
 
 function setSpeakerUI(name){
-  const s = SPEAKERS[name] || { role:"SYSTEM", color:"#cfe1ff" };
+  const s = SPEAKERS[name] || { role:"SYSTEM", color:"#cfe1ff", avatar:null };
+
   dlgNameEl.textContent = name || "???";
   dlgRoleEl.textContent = s.role;
   dlgNameEl.style.color = s.color;
+
+  dlgAvatar.style.boxShadow = `0 12px 26px rgba(0,0,0,.35), 0 0 30px ${s.color}33`;
+  dlgAvatar.style.borderColor = `${s.color}55`;
+
+  // ✅ 이미지 칸으로 표시
+  if (s.avatar){
+    dlgAvatar.src = s.avatar;
+  } else {
+    dlgAvatar.src = "avatars/unknown_avatar.png";
+  }
+}
+
 
   dlgAvatar.style.boxShadow = `0 12px 26px rgba(0,0,0,.35), 0 0 30px ${s.color}33`;
   dlgAvatar.style.borderColor = `${s.color}55`;
