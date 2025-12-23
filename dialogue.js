@@ -1,6 +1,6 @@
 export const SPEAKERS = {
   "로봇": { role: "UNIT",   color: "#72ffb7", avatar: "avatars/robot_avatar.png" },
-  "??":   { role: "SIGNAL", color: "#9db6ff", avatar: "avatars/known_avatar.png" },
+  "??":   { role: "SIGNAL", color: "#9db6ff", avatar: "avatars/unknown_avatar.png" },
 };
 
 export const INTRO_DIALOGUE = [
