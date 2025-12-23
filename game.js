@@ -39,8 +39,8 @@ const uiPlanted = document.getElementById("planted");
 const uiTotal = document.getElementById("total");
 const uiScore = document.getElementById("score");
 const uiHint = document.getElementById("hint");
-const BG_CACHE = new Map();
 
+const BG_CACHE = new Map();
 
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 function overlap(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
@@ -52,24 +52,6 @@ function setStageRuleBox(stage){
   if (!stage?.ruleText) { stageRuleOverlay.classList.remove("is-on"); return; }
   stageRuleOverlay.innerHTML = `<span class="tag">RULE</span>${stage.ruleText}`;
   stageRuleOverlay.classList.add("is-on");
-}
-
-// ====== 아바타: 외부 이미지 의존 제거 (SVG data URI) ======
-function makeAvatarDataURI(name, color){
-  const n = (name || "?").slice(0,2);
-  const svg =
-`<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="${color}" stop-opacity="0.35"/>
-      <stop offset="1" stop-color="#ffffff" stop-opacity="0.08"/>
-    </linearGradient>
-  </defs>
-  <rect x="0" y="0" width="120" height="120" rx="18" fill="url(#g)"/>
-  <text x="60" y="72" font-size="42" font-family="system-ui" font-weight="900"
-        fill="rgba(255,255,255,0.92)" text-anchor="middle">${n}</text>
-</svg>`;
-  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
 }
 
 // ====== 루프 제어 ======
@@ -177,6 +159,7 @@ let dlgOnDone = () => {};
 let typingTimer = null;
 let autoTimer = null;
 
+// ✅ 아바타 이미지를 사용하는 버전 (중복/깨진 코드 전부 제거)
 function setSpeakerUI(name){
   const s = SPEAKERS[name] || { role:"SYSTEM", color:"#cfe1ff", avatar:null };
 
@@ -187,19 +170,9 @@ function setSpeakerUI(name){
   dlgAvatar.style.boxShadow = `0 12px 26px rgba(0,0,0,.35), 0 0 30px ${s.color}33`;
   dlgAvatar.style.borderColor = `${s.color}55`;
 
-  // ✅ 이미지 칸으로 표시
-  if (s.avatar){
-    dlgAvatar.src = s.avatar;
-  } else {
-    dlgAvatar.src = "avatars/unknown_avatar.png";
-  }
+  dlgAvatar.src = s.avatar ? s.avatar : "avatars/unknown_avatar.png";
 }
 
-
-  dlgAvatar.style.boxShadow = `0 12px 26px rgba(0,0,0,.35), 0 0 30px ${s.color}33`;
-  dlgAvatar.style.borderColor = `${s.color}55`;
-  dlgAvatar.src = makeAvatarDataURI(name, s.color);
-}
 function setAutoBtn(){ dlgAutoBtn.textContent = `AUTO: ${dlgAuto ? "ON" : "OFF"}`; }
 
 function openDialogue(lines, onDone){
@@ -313,7 +286,7 @@ async function showLoadingLine(){
   close(loading);
 }
 
-// ====== 카드 시스템 (너 기존 그대로 유지 가능) ======
+// ====== 카드 시스템 ======
 const RARITY = {
   common:    { name:"일반",      w:0.60, cls:"r-common" },
   rare:      { name:"레어",      w:0.27, cls:"r-rare" },
@@ -509,6 +482,59 @@ function autoChooseCard(){
 const STAGES = baseStages7();
 let currentStageIndex = 0;
 
+// ====== 배경 프리로드/렌더 ======
+function preloadStageBackgrounds(){
+  const list = STAGES.map(s => s.bgImage).filter(Boolean);
+  const uniq = [...new Set(list)];
+  return Promise.all(
+    uniq.map(src => new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => { BG_CACHE.set(src, img); resolve(); };
+      img.onerror = () => { console.warn("BG load fail:", src); resolve(); }; // 실패해도 진행
+      img.src = src;
+    }))
+  );
+}
+
+function drawBackground(stage){
+  const src = stage?.bgImage;
+  const img = src ? BG_CACHE.get(src) : null;
+
+  if (img && img.complete && img.naturalWidth > 0){
+    ctx.drawImage(img, 0, 0, W, H);
+    return;
+  }
+
+  // 백업 배경
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  switch(stage?.bgTone){
+    case "desert":
+      g.addColorStop(0, "rgb(255,185,95)");
+      g.addColorStop(1, "rgb(205,125,55)");
+      break;
+    case "toxic":
+      g.addColorStop(0, "rgb(120,90,160)");
+      g.addColorStop(1, "rgb(40,35,70)");
+      break;
+    case "snow":
+      g.addColorStop(0, "rgb(200,225,255)");
+      g.addColorStop(1, "rgb(60,90,130)");
+      break;
+    default:
+      g.addColorStop(0, "rgb(60,60,90)");
+      g.addColorStop(1, "rgb(20,20,40)");
+  }
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+
+  // 디버그 텍스트 (원인 찾기)
+  ctx.save();
+  ctx.fillStyle = "rgba(255,255,255,0.75)";
+  ctx.font = "14px system-ui";
+  ctx.fillText(`BG missing: ${src || "(none)"}`, 18, 28);
+  ctx.restore();
+}
+
 // HUD
 function syncHud(){
   uiStage.textContent = String(currentStageIndex+1);
@@ -522,7 +548,7 @@ function syncHud(){
   uiScore.textContent = String(player.score);
 }
 
-// 발판 높이 보정(너 기존 로직 유지)
+// 발판 높이 보정
 function getSurfaceY(targetX) {
   let bestY = GROUND_Y;
   for (const p of platforms) {
@@ -619,7 +645,6 @@ async function beginStage(stageIndex, withCardPick=true){
 
   stageReady = false;
 
-  // ✅ 스테이지 전환마다 ??가 설명(문서 반영)
   openDialogue(stageEnterDialogue(STAGES[stageIndex].name, STAGES[stageIndex].ruleText), ()=>{
     if (withCardPick) showCardPick(currentStageIndex);
     else stageReady = true;
@@ -679,11 +704,8 @@ function getStageSpeedMultiplier(){
   return S?.stageSpeedMul ?? 1.0;
 }
 function getDebuffSpeedMultiplier(){
-  // ✅ 회오리 디버프(5초간 80% 감소) => speed * 0.20
   if (player.slowMs > 0) return 0.20;
-  // ✅ 빙결 중이면 아예 못 움직이게(0)
   if (player.freezeMs > 0) return 0.00;
-  // ✅ 스턴 중이면 아예 못 움직이게(0)
   if (player.stunMs > 0) return 0.00;
   return 1.00;
 }
@@ -752,7 +774,7 @@ function update(dt){
     warnOverlay.classList.remove("is-on");
   }
 
-  // ====== ✅ Stage6 산성비 (3초 off / 3초 on 반복) ======
+  // ====== ✅ Stage6 산성비 ======
   if (S?.acidRain){
     player.acidCycleMs += dt;
     const cycle = S.acidRain.onMs + S.acidRain.offMs;
@@ -773,7 +795,7 @@ function update(dt){
     player.acidOn = false;
   }
 
-  // ====== ✅ Stage7 빙결(10~15초 무작위 간격, 2초) ======
+  // ====== ✅ Stage7 빙결 ======
   if (S?.snow){
     if (player.nextFreezeMs > 0){
       player.nextFreezeMs -= dt;
@@ -793,14 +815,13 @@ function update(dt){
   if (player.slowMs < 0) player.slowMs = 0;
   if (player.freezeMs < 0) player.freezeMs = 0;
 
-  // ====== 입력(상태이상 반영) ======
+  // ====== 입력 ======
   const left  = isHeld("ArrowLeft") || isHeld("KeyA");
   const right = isHeld("ArrowRight") || isHeld("KeyD");
   const jumpPressed  = wasPressed("Space") || wasPressed("ArrowUp") || wasPressed("KeyW");
   const plantPressed = wasPressed("KeyE");
   const waterPressed = wasPressed("KeyF");
 
-  // 이동 막힘(스턴/빙결)
   const canAct = (player.stunMs <= 0 && player.freezeMs <= 0);
 
   if (left) player.direction = -1;
@@ -978,7 +999,7 @@ function update(dt){
     }
   }
 
-  // ====== ✅ Stage4 회오리 충돌: 2초 스턴 + 5초 80% 이속 감소 ======
+  // ====== ✅ Stage4 회오리 충돌 ======
   for (const tw of tornados){
     tw.t += dt * 0.002;
     const wobble = Math.sin(tw.t) * 10;
@@ -1010,7 +1031,7 @@ function update(dt){
 
   world.camX = clamp(player.x - W*0.35, 0, world.length - W);
 
-  // 식물 O2 회복 (너 기존)
+  // 식물 O2 회복
   for (const pl of plots){
     if (!pl.planted) continue;
     if (!pl.watered) { pl.holdMs = 0; continue; }
@@ -1082,83 +1103,6 @@ function drawTextTag(x, y, text){
   ctx.restore();
 }
 
-function drawBackground(stage){
-  /**
- * stage.bgImage : "background/stage1.png" 형태의 경로
- * - 캔버스 크기(960x540)에 맞춰 꽉 채워서 그린다
- * - 비율 유지 X (게임 배경용이므로 stretch)
- * - 로딩 실패 시 그라데이션 백업 사용
- */
-
-function drawBackground(stage){
-  const src = stage?.bgImage;
-  const img = src ? BG_CACHE.get(src) : null;
-
-  // =========================
-  // 1) 정상 로드된 PNG 배경
-  // =========================
-  if (img && img.complete && img.naturalWidth > 0){
-    ctx.drawImage(img, 0, 0, W, H);
-    return;
-  }
-
-  // =========================
-  // 2) 백업용 그라데이션 배경
-  //    (이미지 로딩 실패 대비)
-  // =========================
-  const g = ctx.createLinearGradient(0, 0, 0, H);
-
-  // 스테이지별 톤 자동 분기 (없어도 되지만 안정감 ↑)
-  switch(stage?.bgTone){
-    case "desert":
-      g.addColorStop(0, "rgb(255,185,95)");
-      g.addColorStop(1, "rgb(205,125,55)");
-      break;
-    case "toxic":
-      g.addColorStop(0, "rgb(120,90,160)");
-      g.addColorStop(1, "rgb(40,35,70)");
-      break;
-    case "snow":
-      g.addColorStop(0, "rgb(200,225,255)");
-      g.addColorStop(1, "rgb(60,90,130)");
-      break;
-    default:
-      g.addColorStop(0, "rgb(60,60,90)");
-      g.addColorStop(1, "rgb(20,20,40)");
-  }
-
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, W, H);
-
-  // =========================
-  // 3) 로딩 중 안내 텍스트
-  // =========================
-  if (!img){
-    ctx.save();
-    ctx.fillStyle = "rgba(255,255,255,0.75)";
-    ctx.font = "14px system-ui";
-    ctx.textAlign = "center";
-    ctx.fillText("배경 로딩 중…", W / 2, H / 2);
-    ctx.restore();
-  }
-}
-
-async function preloadStageBackgrounds(){
-  const list = STAGES.map(s => s.bgImage).filter(Boolean);
-  const uniq = [...new Set(list)];
-
-  await Promise.all(
-    uniq.map(src => new Promise((resolve, reject)=>{
-      const img = new Image();
-      img.onload = () => { BG_CACHE.set(src, img); resolve(); };
-      img.onerror = reject;
-      img.src = src;
-    }))
-  );
-}
-
-
-
 function render(){
   ctx.clearRect(0,0,W,H);
   const S = STAGES[currentStageIndex] || STAGES[0];
@@ -1200,7 +1144,6 @@ function render(){
       ctx.fillStyle = "rgba(120,78,35,0.65)";
       ctx.fillRect(p.x,p.y,p.w,p.h);
     } else {
-      // 독성 발판은 보라 테두리로 표시
       if (p.toxic){
         ctx.fillStyle = "rgba(120,60,180,0.35)";
         ctx.fillRect(p.x,p.y,p.w,p.h);
@@ -1289,22 +1232,25 @@ function render(){
   // 플레이어
   const blink = player.invulnMs > 0 && Math.floor(performance.now()/80)%2===0;
   ctx.globalAlpha = blink ? 0.35 : 1;
+
   const aspect = player.imgWidth / player.imgHeight;
   let dWidth, dHeight;
   if (aspect > player.w / player.h) { dWidth = player.w; dHeight = player.w / aspect; }
   else { dHeight = player.h; dWidth = player.h * aspect; }
   const dx = player.x + (player.w - dWidth) / 2;
   const dy = player.y + (player.h - dHeight) / 2;
+
   ctx.save();
   ctx.translate(dx + dWidth / 2, dy + dHeight / 2);
   ctx.scale(player.direction, 1);
+
   if (player.image.complete && player.image.naturalWidth > 0){
     ctx.drawImage(player.image, -dWidth / 2, -dHeight / 2, dWidth, dHeight);
   } else {
-    // 이미지 없으면 임시 로봇 박스
     ctx.fillStyle = "rgba(120,255,180,0.9)";
     ctx.fillRect(-dWidth/2, -dHeight/2, dWidth, dHeight);
   }
+
   ctx.restore();
   ctx.globalAlpha = 1;
 
@@ -1323,15 +1269,14 @@ async function runIntroAndStart(){
   });
 }
 
-(function boot(){
+// ✅ await 때문에 반드시 async boot
+(async function boot(){
   close(overlay);
   close(loading);
   close(dialogue);
 
   await preloadStageBackgrounds();
 
-
-  // 네 파일 구조 그대로면 robot.png가 있어야 함. 없으면 위 임시 박스로 표시됨.
   player.image.src = "robot.png";
   player.image.onload = () => { player.imgWidth = player.image.width; player.imgHeight = player.image.height; };
 
