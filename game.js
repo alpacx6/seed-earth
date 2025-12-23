@@ -505,6 +505,43 @@ function drawBackground(stage){
     return;
   }
 
+  const tone = stage?.bgTone ?? stage?.bg?.theme;
+
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  switch(tone){
+    case "desert":
+    case "dryriver":
+    case "sandstorm":
+      g.addColorStop(0, "rgb(255,185,95)");
+      g.addColorStop(1, "rgb(205,125,55)");
+      break;
+    case "toxic":
+    case "toxiccity":
+    case "labruin":
+    case "acidtown":
+      g.addColorStop(0, "rgb(120,90,160)");
+      g.addColorStop(1, "rgb(40,35,70)");
+      break;
+    case "snow":
+      g.addColorStop(0, "rgb(200,225,255)");
+      g.addColorStop(1, "rgb(60,90,130)");
+      break;
+    default:
+      g.addColorStop(0, "rgb(60,60,90)");
+      g.addColorStop(1, "rgb(20,20,40)");
+  }
+
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.save();
+  ctx.fillStyle = "rgba(255,255,255,0.75)";
+  ctx.font = "14px system-ui";
+  ctx.fillText(`BG missing: ${src || "(none)"}`, 18, 28);
+  ctx.restore();
+}
+
+
   // 백업 배경
   const g = ctx.createLinearGradient(0, 0, 0, H);
   switch(stage?.bgTone){
