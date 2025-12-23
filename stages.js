@@ -22,6 +22,8 @@ export function baseStages7(){
       spikes: [740, 1240, 2100, 3040],
       orbs: [{ x: 920, baseY: 240 }, { x: 1760, baseY: 220 }, { x: 3340, baseY: 210 }],
       seedXs: [560, 820, 1460, 1700, 2360, 2620, 3300],
+      bgImage: "background/stage1.png",
+
     },
 
     {
@@ -43,6 +45,7 @@ export function baseStages7(){
       spikes: [720, 1320, 2320, 3120, 3560],
       orbs: [{ x: 980, baseY: 220 }, { x: 1960, baseY: 210 }, { x: 3860, baseY: 205 }],
       seedXs: [620, 900, 1540, 1800, 2520, 2780, 3460, 3800],
+      bgImage: "background/stage2.png",
     },
 
     {
@@ -65,6 +68,8 @@ export function baseStages7(){
       spikes: [680, 1760, 2360, 3280, 3720, 4160],
       orbs: [{ x: 760, baseY: 210 }, { x: 2880, baseY: 185 }, { x: 4380, baseY: 200 }],
       seedXs: [640, 940, 1600, 1860, 2540, 2800, 3500, 3840, 4200],
+      bgImage: "background/stage3.png",
+
     },
 
     {
@@ -87,6 +92,7 @@ export function baseStages7(){
       spikes: [760,1120,1480,1760,2100,2460,2860,3180,3520,3880,4280,4560],
       orbs: [{ x: 840, baseY: 205 }, { x: 1700, baseY: 190 }, { x: 2600, baseY: 180 }, { x: 3400, baseY: 190 }, { x: 4200, baseY: 200 }, { x: 4700, baseY: 210 }],
       seedXs: [700, 1000, 1680, 2050, 2750, 3000, 3650, 4050, 4400, 4700],
+      bgImage: "background/stage4.png",
     },
 
     {
@@ -109,6 +115,8 @@ export function baseStages7(){
       spikes: [720,900,1180,1500,1760,2060,2400,2600,2920,3160,3480,3700,4020,4300,4580,4880,5100],
       orbs: [{ x: 820, baseY: 200 }, { x: 1480, baseY: 185 }, { x: 2140, baseY: 175 }, { x: 2860, baseY: 170 }, { x: 3600, baseY: 180 }, { x: 4480, baseY: 190 }, { x: 5160, baseY: 205 }],
       seedXs: [780,1020,1600,1960,2700,3000,3720,4100,4420,4760,5100],
+      bgImage: "background/stage5.png",
+
     },
 
     {
@@ -132,6 +140,8 @@ export function baseStages7(){
       spikes: [700,880,1160,1480,1740,2040,2380,2580,2900,3140,3460,3680,4000,4280,4560,4860,5080,5280],
       orbs: [{ x: 800, baseY: 195 }, { x: 1460, baseY: 180 }, { x: 2120, baseY: 170 }, { x: 2840, baseY: 165 }, { x: 3580, baseY: 175 }, { x: 4460, baseY: 185 }, { x: 5140, baseY: 200 }, { x: 5420, baseY: 210 }],
       seedXs: [760,1000,1580,1940,2680,2980,3700,4080,4400,4740,5080,5360],
+      bgImage: "background/stage6.png",
+
     },
 
     {
@@ -155,6 +165,8 @@ export function baseStages7(){
       spikes: [680,860,1140,1460,1720,2020,2360,2560,2880,3120,3440,3660,3980,4260,4540,4840,5060,5260,5480],
       orbs: [{ x: 780, baseY: 190 }, { x: 1440, baseY: 175 }, { x: 2100, baseY: 165 }, { x: 2820, baseY: 160 }, { x: 3560, baseY: 170 }, { x: 4440, baseY: 180 }, { x: 5120, baseY: 195 }, { x: 5400, baseY: 205 }, { x: 5720, baseY: 215 }],
       seedXs: [740,980,1560,1920,2660,2960,3680,4060,4380,4720,5060,5340,5660],
+      bgImage: "background/stage7.png",
+
     },
   ];
 }
