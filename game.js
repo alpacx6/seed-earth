@@ -1,3 +1,5 @@
+alert("game.js 실행됨");
+
 // game.js (type="module")
 import { baseStages7, rand } from "./stages.js";
 import { SPEAKERS, INTRO_DIALOGUE, END_DIALOGUE, stageEnterDialogue } from "./dialogue.js";
