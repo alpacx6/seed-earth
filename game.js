@@ -1328,6 +1328,9 @@ async function runIntroAndStart(){
   close(loading);
   close(dialogue);
 
+  await preloadStageBackgrounds();
+
+
   // 네 파일 구조 그대로면 robot.png가 있어야 함. 없으면 위 임시 박스로 표시됨.
   player.image.src = "robot.png";
   player.image.onload = () => { player.imgWidth = player.image.width; player.imgHeight = player.image.height; };
