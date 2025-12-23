@@ -39,6 +39,8 @@ const uiPlanted = document.getElementById("planted");
 const uiTotal = document.getElementById("total");
 const uiScore = document.getElementById("score");
 const uiHint = document.getElementById("hint");
+const BG_CACHE = new Map();
+
 
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 function overlap(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
@@ -1068,105 +1070,81 @@ function drawTextTag(x, y, text){
 }
 
 function drawBackground(stage){
-  const g = ctx.createLinearGradient(0,0,0,H*0.6);
-  g.addColorStop(0, `rgba(${stage.bg.skyTop[0]},${stage.bg.skyTop[1]},${stage.bg.skyTop[2]},0.55)`);
-  g.addColorStop(1, `rgba(${stage.bg.skyBot[0]},${stage.bg.skyBot[1]},${stage.bg.skyBot[2]},0.35)`);
+  /**
+ * stage.bgImage : "background/stage1.png" 형태의 경로
+ * - 캔버스 크기(960x540)에 맞춰 꽉 채워서 그린다
+ * - 비율 유지 X (게임 배경용이므로 stretch)
+ * - 로딩 실패 시 그라데이션 백업 사용
+ */
+
+function drawBackground(stage){
+  const src = stage?.bgImage;
+  const img = src ? BG_CACHE.get(src) : null;
+
+  // =========================
+  // 1) 정상 로드된 PNG 배경
+  // =========================
+  if (img && img.complete && img.naturalWidth > 0){
+    ctx.drawImage(img, 0, 0, W, H);
+    return;
+  }
+
+  // =========================
+  // 2) 백업용 그라데이션 배경
+  //    (이미지 로딩 실패 대비)
+  // =========================
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+
+  // 스테이지별 톤 자동 분기 (없어도 되지만 안정감 ↑)
+  switch(stage?.bgTone){
+    case "desert":
+      g.addColorStop(0, "rgb(255,185,95)");
+      g.addColorStop(1, "rgb(205,125,55)");
+      break;
+    case "toxic":
+      g.addColorStop(0, "rgb(120,90,160)");
+      g.addColorStop(1, "rgb(40,35,70)");
+      break;
+    case "snow":
+      g.addColorStop(0, "rgb(200,225,255)");
+      g.addColorStop(1, "rgb(60,90,130)");
+      break;
+    default:
+      g.addColorStop(0, "rgb(60,60,90)");
+      g.addColorStop(1, "rgb(20,20,40)");
+  }
+
   ctx.fillStyle = g;
-  ctx.fillRect(0,0,W,H);
+  ctx.fillRect(0, 0, W, H);
 
-  ctx.fillStyle = `rgba(${stage.bg.haze[0]},${stage.bg.haze[1]},${stage.bg.haze[2]},0.22)`;
-  ctx.fillRect(0,H*0.48,W,H*0.52);
-
-  // 테마별 간단 실루엣(이미지 없이 배경 ‘그럴듯’하게)
-  const t = performance.now()*0.0012;
-
-  if (stage.bg.theme === "desert" || stage.bg.theme === "sandstorm"){
+  // =========================
+  // 3) 로딩 중 안내 텍스트
+  // =========================
+  if (!img){
     ctx.save();
-    ctx.globalAlpha = 0.25;
-    ctx.fillStyle = "rgba(0,0,0,0.35)";
-    for (let i=0;i<6;i++){
-      const x = (i*180 + (t*30)%180) % (W+220) - 120;
-      const y = 320 + Math.sin(t+i)*10;
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.quadraticCurveTo(x+110, y-40, x+220, y+10);
-      ctx.lineTo(x+220, H);
-      ctx.lineTo(x, H);
-      ctx.closePath();
-      ctx.fill();
-    }
-    ctx.restore();
-
-    // 모래폭풍 stage4: 먼지 커튼
-    if (stage.bg.theme === "sandstorm"){
-      ctx.save();
-      ctx.globalAlpha = 0.12;
-      ctx.fillStyle = "rgba(255,240,200,1)";
-      for (let i=0;i<80;i++){
-        const x = (i*40 + (t*120)%40) % (W+80) - 40;
-        const y = (i*17) % H;
-        ctx.fillRect(x, y, 24, 2);
-      }
-      ctx.restore();
-    }
-  }
-
-  if (stage.bg.theme === "dryriver"){
-    ctx.save();
-    ctx.globalAlpha = 0.25;
-    ctx.fillStyle = "rgba(0,0,0,0.35)";
-    for (let i=0;i<5;i++){
-      const x = i*220 - (t*25)%220;
-      ctx.fillRect(x+40, 280, 90, 120);
-      ctx.fillRect(x+55, 250, 60, 35);
-    }
-    ctx.restore();
-  }
-
-  if (stage.bg.theme === "toxiccity"){
-    ctx.save();
-    ctx.globalAlpha = 0.35;
-    ctx.fillStyle = "rgba(40,0,60,0.55)";
-    ctx.fillRect(0,0,W,H);
-    ctx.globalAlpha = 0.25;
-    ctx.fillStyle = "rgba(0,0,0,0.55)";
-    for (let i=0;i<8;i++){
-      const x = i*140 - (t*18)%140;
-      const h = 90 + (i%3)*40;
-      ctx.fillRect(x+30, 340-h, 70, h);
-    }
-    ctx.restore();
-  }
-
-  if (stage.bg.theme === "labruin" || stage.bg.theme === "acidtown"){
-    ctx.save();
-    ctx.globalAlpha = 0.25;
-    ctx.fillStyle = "rgba(0,0,0,0.6)";
-    for (let i=0;i<6;i++){
-      const x = i*170 - (t*20)%170;
-      ctx.beginPath();
-      ctx.moveTo(x+30, 360);
-      ctx.lineTo(x+110, 290);
-      ctx.lineTo(x+150, 360);
-      ctx.closePath();
-      ctx.fill();
-    }
-    ctx.restore();
-  }
-
-  if (stage.bg.theme === "snow"){
-    // 눈 파티클
-    ctx.save();
-    ctx.globalAlpha = 0.25;
-    ctx.fillStyle = "rgba(255,255,255,1)";
-    for (let i=0;i<120;i++){
-      const x = (i*37 + (t*40)%W) % W;
-      const y = (i*19 + (t*90)%H) % H;
-      ctx.fillRect(x, y, 2, 2);
-    }
+    ctx.fillStyle = "rgba(255,255,255,0.75)";
+    ctx.font = "14px system-ui";
+    ctx.textAlign = "center";
+    ctx.fillText("배경 로딩 중…", W / 2, H / 2);
     ctx.restore();
   }
 }
+
+async function preloadStageBackgrounds(){
+  const list = STAGES.map(s => s.bgImage).filter(Boolean);
+  const uniq = [...new Set(list)];
+
+  await Promise.all(
+    uniq.map(src => new Promise((resolve, reject)=>{
+      const img = new Image();
+      img.onload = () => { BG_CACHE.set(src, img); resolve(); };
+      img.onerror = reject;
+      img.src = src;
+    }))
+  );
+}
+
+
 
 function render(){
   ctx.clearRect(0,0,W,H);
