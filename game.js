@@ -2,11 +2,10 @@
 import { baseStages7, rand } from "./stages.js";
 import { SPEAKERS, INTRO_DIALOGUE, END_DIALOGUE, stageEnterDialogue } from "./dialogue.js";
 
-console.log("game.js LOADED (FINAL PACK)");
+console.log("game.js LOADED (FINAL)");
 
-// =====================
-// DOM
-// =====================
+const BASE_URL = new URL("./", import.meta.url); // ✅ 모든 경로를 여기 기준으로 안전하게
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const W = canvas.width, H = canvas.height;
@@ -43,131 +42,21 @@ const uiTotal = document.getElementById("total");
 const uiScore = document.getElementById("score");
 const uiHint = document.getElementById("hint");
 
-// Start/End screen
-const startScreen = document.getElementById("startScreen");
-const endScreen = document.getElementById("endScreen");
-const btnStart = document.getElementById("btnStart");
-const btnHow = document.getElementById("btnHow");
-const howPanel = document.getElementById("howPanel");
-const btnHowClose = document.getElementById("btnHowClose");
-const btnRestart = document.getElementById("btnRestart");
-const btnHome = document.getElementById("btnHome");
-const endScoreEl = document.getElementById("endScore");
-const endPlantedEl = document.getElementById("endPlanted");
-
-// =====================
-// Helpers
-// =====================
-const BG_CACHE = new Map();
-const IMG_CACHE = new Map();
-
+// ====== utils ======
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 function overlap(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
 function open(el){ el.classList.add("is-open"); }
 function close(el){ el.classList.remove("is-open"); }
 function setHint(msg){ uiHint.textContent = msg || ""; }
 
-// =====================
-// Global game flags
-// =====================
-let gameRunning = false;
-let gameEnded = false;
-
-// =====================
-// Screen controls
-// =====================
-function openStart(){
-  startScreen.classList.add("is-open");
-  startScreen.setAttribute("aria-hidden","false");
-  gameRunning = false;
-  gameEnded = false;
-}
-function closeStart(){
-  startScreen.classList.remove("is-open");
-  startScreen.setAttribute("aria-hidden","true");
-}
-function openEnd(){
-  endScreen.classList.add("is-open");
-  endScreen.setAttribute("aria-hidden","false");
-  gameRunning = false;
-  gameEnded = true;
-  endScoreEl.textContent = String(player.score);
-  endPlantedEl.textContent = String(player.planted);
-}
-function closeEnd(){
-  endScreen.classList.remove("is-open");
-  endScreen.setAttribute("aria-hidden","true");
-}
-
-// Start screen buttons
-btnStart?.addEventListener("click", async () => {
-  closeStart();
-  gameRunning = true;
-
-  // intro -> stage 1 시작
-  openDialogue(INTRO_DIALOGUE, async () => {
-    await showLoadingLine();
-    await beginStage(0, true);
-    setHint("←/→ 이동, Space 점프, E 심기, F 물주기, Q 재시작, R 카드발동, Shift AUTO");
-    renderOwnedCards();
-    if (!running) startLoop();
-  });
-});
-
-btnHow?.addEventListener("click", () => howPanel?.classList.add("is-open"));
-btnHowClose?.addEventListener("click", () => howPanel?.classList.remove("is-open"));
-
-btnHome?.addEventListener("click", () => {
-  closeEnd();
-  resetAllGameState();
-  openStart();
-});
-btnRestart?.addEventListener("click", async () => {
-  closeEnd();
-  resetAllGameState();
-  gameRunning = true;
-  await showLoadingLine();
-  await beginStage(0, true);
-  if (!running) startLoop();
-});
-
-// =====================
-// Stage Rule Box
-// =====================
+// ====== stage rule box ======
 function setStageRuleBox(stage){
   if (!stage?.ruleText) { stageRuleOverlay.classList.remove("is-on"); return; }
-  stageRuleOverlay.innerHTML = `<span class="tag">RULE</span> ${stage.ruleText}`;
+  stageRuleOverlay.innerHTML = `<span class="tag">RULE</span>${stage.ruleText}`;
   stageRuleOverlay.classList.add("is-on");
 }
 
-// =====================
-// Image loader
-// =====================
-function loadImage(src){
-  if (!src) return null;
-  if (IMG_CACHE.has(src)) return IMG_CACHE.get(src);
-  const img = new Image();
-  img.src = src;
-  IMG_CACHE.set(src, img);
-  return img;
-}
-
-async function preloadStageBackgrounds(){
-  const list = STAGES.map(s => s.bgImage).filter(Boolean);
-  const uniq = [...new Set(list)];
-  await Promise.all(
-    uniq.map(src => new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => { BG_CACHE.set(src, img); resolve(); };
-      img.onerror = () => resolve(); // 실패해도 진행
-      img.src = src;
-    }))
-  );
-}
-
-// =====================
-// Loop control
-// =====================
+// ====== loop control ======
 let running = false;
 let lastT = 0;
 let rafId = null;
@@ -184,9 +73,7 @@ function startLoop() {
   rafId = requestAnimationFrame(loop);
 }
 
-// =====================
-// Input
-// =====================
+// ====== input ======
 const held = new Set();
 const pressed = new Set();
 addEventListener("keydown", (e) => {
@@ -199,9 +86,7 @@ addEventListener("keyup", (e) => held.delete(e.code));
 function wasPressed(code) { if (pressed.has(code)) { pressed.delete(code); return true; } return false; }
 function isHeld(code){ return held.has(code); }
 
-// =====================
-// World / Physics
-// =====================
+// ====== world / physics ======
 const GRAV = 0.85;
 const GROUND_Y = 440;
 
@@ -216,13 +101,6 @@ const world = {
   length: 3600,
   maxSpeedBase: 5.0,
   frictionNearGround: 0.84,
-};
-
-// ✅ Sprites (너가 만든 이미지 파일 넣으면 됨)
-const SPRITES = {
-  robot: "./sprites/robot.png",
-  seed: "./sprites/seed.png",
-  tornado: "./sprites/tornado.png",
 };
 
 const player = {
@@ -272,9 +150,7 @@ const player = {
 function getMaxHp(){ return player.maxHpBase + player.maxHpBonus; }
 function getMaxO2(){ return player.maxO2Base + player.maxO2Bonus; }
 
-// =====================
-// Dialogue system (avatar per line)
-/// =====================
+// ====== dialogue system ======
 let dlgActive = false;
 let dlgLines = [];
 let dlgIdx = 0;
@@ -284,8 +160,12 @@ let dlgOnDone = () => {};
 let typingTimer = null;
 let autoTimer = null;
 
+function resolveAsset(rel){
+  return new URL(rel, BASE_URL).href;
+}
+
 function setSpeakerUI(name){
-  const s = SPEAKERS[name] || { role:"SYSTEM", color:"#cfe1ff", avatar:"./avatars/unknown.png" };
+  const s = SPEAKERS[name] || { role:"SYSTEM", color:"#cfe1ff", avatar:"avatars/unknown_avatar.png" };
 
   dlgNameEl.textContent = name || "???";
   dlgRoleEl.textContent = s.role;
@@ -293,7 +173,9 @@ function setSpeakerUI(name){
 
   dlgAvatar.style.boxShadow = `0 12px 26px rgba(0,0,0,.35), 0 0 30px ${s.color}33`;
   dlgAvatar.style.borderColor = `${s.color}55`;
-  dlgAvatar.src = s.avatar || "./avatars/unknown.png";
+
+  // ✅ avatar도 GitHub Pages 안전 경로
+  dlgAvatar.src = resolveAsset(s.avatar || "avatars/unknown_avatar.png");
 }
 
 function setAutoBtn(){ dlgAutoBtn.textContent = `AUTO: ${dlgAuto ? "ON" : "OFF"}`; }
@@ -394,9 +276,7 @@ addEventListener("keydown", (e)=>{
   }
 });
 
-// =====================
-// Loading quotes
-// =====================
+// ====== loading quotes ======
 const LOADING_QUOTES = [
   "당신의 선택이 지구의 내일을 바꿉니다.",
   "오염은 빠르고, 회복은 느립니다. 그래서 지금이 중요합니다.",
@@ -407,13 +287,11 @@ const LOADING_QUOTES = [
 async function showLoadingLine(){
   open(loading);
   loadingText.textContent = LOADING_QUOTES[Math.floor(Math.random()*LOADING_QUOTES.length)];
-  await new Promise(r=>setTimeout(r, 850));
+  await new Promise(r=>setTimeout(r, 900));
   close(loading);
 }
 
-// =====================
-// Cards (그대로 유지)
-/// =====================
+// ====== cards ======
 const RARITY = {
   common:    { name:"일반",      w:0.60, cls:"r-common" },
   rare:      { name:"레어",      w:0.27, cls:"r-rare" },
@@ -606,12 +484,11 @@ function autoChooseCard(){
   chooseCard(idx);
 }
 
-// =====================
-// Stage system
-// =====================
+// ====== stages ======
 const STAGES = baseStages7();
 let currentStageIndex = 0;
 
+// HUD
 function syncHud(){
   uiStage.textContent = String(currentStageIndex+1);
   uiHp.textContent = String(Math.max(0, Math.floor(player.hp)));
@@ -624,6 +501,7 @@ function syncHud(){
   uiScore.textContent = String(player.score);
 }
 
+// 발판 높이
 function getSurfaceY(targetX) {
   let bestY = GROUND_Y;
   for (const p of platforms) {
@@ -657,7 +535,7 @@ function buildStage(stageIndex){
 
   (S.seedXs||[]).forEach((sx) => {
     const seedSurfaceY = getSurfaceY(sx + 9);
-    seeds.push({ x:sx, y: seedSurfaceY - 36, w:28, h:28, taken:false });
+    seeds.push({ x:sx, y: seedSurfaceY - 35, w:24, h:24, taken:false });
 
     const plotX = sx + 90;
     const plotSurfaceY = getSurfaceY(plotX + 14);
@@ -666,17 +544,14 @@ function buildStage(stageIndex){
       y: plotSurfaceY - 18,
       w: 28, h: 18,
       planted:false, watered:false, o2Given:false, holdMs:0, plantMs:0,
-      grow: 0, // ✅ 성장 모션용 (0~1)
-      burstDone: false, // ✅ 완성시 파티클 1회만
     });
   });
 
-  // Stage4 tornados
   if (S.windZones?.count){
     for (let i=0;i<S.windZones.count;i++){
       const x = rand(600, world.length-400);
       const y = rand(220, 360);
-      tornados.push({ x, y, w: 70, h: 180, t: rand(0,10) });
+      tornados.push({ x, y, w: 54, h: 170, t: rand(0,10) });
     }
   }
 
@@ -789,21 +664,74 @@ function getTotalSpeedMultiplier(){
   return getCardSpeedMultiplier() * getStageSpeedMultiplier() * getDebuffSpeedMultiplier();
 }
 
-// =====================
-// Main loop
-// =====================
+// ====== background preload/draw (핵심!) ======
+const BG_CACHE = new Map();
+
+async function preloadStageBackgrounds(){
+  const list = STAGES.map(s => s.bgImage).filter(Boolean);
+  const uniq = [...new Set(list)];
+
+  await Promise.all(
+    uniq.map(rel => new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => { BG_CACHE.set(rel, img); resolve(); };
+      img.onerror = () => { console.warn("BG load fail:", rel); resolve(); };
+
+      // ✅ 무조건 seed-earth/ 기준으로 안전하게 로드됨
+      img.src = resolveAsset(rel);
+    }))
+  );
+}
+
+function drawBackground(stage){
+  const rel = stage?.bgImage;
+  const img = rel ? BG_CACHE.get(rel) : null;
+
+  if (img && img.complete && img.naturalWidth > 0){
+    ctx.drawImage(img, 0, 0, W, H);
+    return;
+  }
+
+  // fallback gradient
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  const tone = stage?.bg?.theme || "default";
+  switch(tone){
+    case "desert":
+    case "dryriver":
+    case "sandstorm":
+      g.addColorStop(0, "rgb(255,185,95)");
+      g.addColorStop(1, "rgb(205,125,55)");
+      break;
+    case "toxiccity":
+      g.addColorStop(0, "rgb(120,90,160)");
+      g.addColorStop(1, "rgb(40,35,70)");
+      break;
+    case "snow":
+      g.addColorStop(0, "rgb(200,225,255)");
+      g.addColorStop(1, "rgb(60,90,130)");
+      break;
+    default:
+      g.addColorStop(0, "rgb(60,60,90)");
+      g.addColorStop(1, "rgb(20,20,40)");
+  }
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,W,H);
+
+  if (rel && !img){
+    ctx.save();
+    ctx.fillStyle = "rgba(255,255,255,0.75)";
+    ctx.font = "14px system-ui";
+    ctx.textAlign = "center";
+    ctx.fillText("배경 로딩 중…", W/2, H/2);
+    ctx.restore();
+  }
+}
+
+// ====== main loop ======
 function loop(t){
   if (!running) return;
   const dt = Math.min(32, t - lastT);
   lastT = t;
-
-  // ✅ Start/End screen 상태면 멈춤
-  if (!gameRunning){
-    render();
-    rafId = requestAnimationFrame(loop);
-    pressed.clear();
-    return;
-  }
 
   if (cardPickActive){
     cardPickTimer -= dt/1000;
@@ -827,16 +755,12 @@ function loop(t){
   pressed.clear();
 }
 
-// =====================
-// Update
-// =====================
 function update(dt){
   if (wasPressed("KeyQ")) { restartStageNoCard(); return; }
   if (wasPressed("KeyR")) useActivatableCard();
 
   const S = STAGES[currentStageIndex];
 
-  // 카드: 주기 O2
   if (upgrade.periodicO2){
     upgrade.periodicTimer += dt;
     if (upgrade.periodicTimer >= 3000){
@@ -846,7 +770,6 @@ function update(dt){
     }
   }
 
-  // 기본 산소 감소
   player.o2 -= (2.0 * dt / 1000);
   if (player.o2 < 0) player.o2 = 0;
 
@@ -863,7 +786,6 @@ function update(dt){
     warnOverlay.classList.remove("is-on");
   }
 
-  // Stage6 산성비
   if (S?.acidRain){
     player.acidCycleMs += dt;
     const cycle = S.acidRain.onMs + S.acidRain.offMs;
@@ -872,9 +794,8 @@ function update(dt){
 
     if (player.acidOn){
       player.acidDmgAcc += dt;
-      const perMs = 1000;
-      while (player.acidDmgAcc >= perMs){
-        player.acidDmgAcc -= perMs;
+      while (player.acidDmgAcc >= 1000){
+        player.acidDmgAcc -= 1000;
         player.hp = clamp(player.hp - S.acidRain.dps, 0, getMaxHp());
       }
     } else {
@@ -884,7 +805,6 @@ function update(dt){
     player.acidOn = false;
   }
 
-  // Stage7 빙결
   if (S?.snow){
     if (player.nextFreezeMs > 0){
       player.nextFreezeMs -= dt;
@@ -896,7 +816,6 @@ function update(dt){
     }
   }
 
-  // 디버프 타이머
   if (player.stunMs > 0) player.stunMs -= dt;
   if (player.slowMs > 0) player.slowMs -= dt;
   if (player.freezeMs > 0) player.freezeMs -= dt;
@@ -904,7 +823,6 @@ function update(dt){
   if (player.slowMs < 0) player.slowMs = 0;
   if (player.freezeMs < 0) player.freezeMs = 0;
 
-  // 입력
   const left  = isHeld("ArrowLeft") || isHeld("KeyA");
   const right = isHeld("ArrowRight") || isHeld("KeyD");
   const jumpPressed  = wasPressed("Space") || wasPressed("ArrowUp") || wasPressed("KeyW");
@@ -947,7 +865,7 @@ function update(dt){
   player.y += player.vy;
   player.x = clamp(player.x, 0, world.length - player.w);
 
-  // 충돌
+  // collisions
   player.onGround = false;
   let stoodPlatform = null;
 
@@ -973,7 +891,7 @@ function update(dt){
     }
   }
 
-  // Stage3 독성 발판
+  // stage3 toxic platform DOT
   if (stoodPlatform?.toxic){
     player.toxicMs = Math.max(player.toxicMs, 3000);
   }
@@ -991,7 +909,7 @@ function update(dt){
     }
   }
 
-  // 씨앗 획득
+  // seed pickup
   for (const s of seeds){
     if (s.taken) continue;
     if (overlap({x:player.x,y:player.y,w:player.w,h:player.h}, {x:s.x,y:s.y,w:s.w,h:s.h})){
@@ -1002,7 +920,7 @@ function update(dt){
     }
   }
 
-  // 심기/물주기
+  // plant / water
   if (plantPressed && player.plantCooldownMs <= 0 && canAct){
     for (const pl of plots){
       if (pl.planted) continue;
@@ -1014,14 +932,11 @@ function update(dt){
         pl.o2Given = false;
         pl.holdMs = 0;
         pl.plantMs = 0;
-        pl.grow = 0;
-        pl.burstDone = false;
-
         player.seedInv -= 1;
         player.planted += 1;
         player.score += 260 + currentStageIndex * 35;
         setHint("🌱 심기 완료! 이제 F로 물을 주세요.");
-        player.plantCooldownMs = 900;
+        player.plantCooldownMs = 1000;
       } else setHint("씨앗이 부족합니다.");
       break;
     }
@@ -1043,7 +958,7 @@ function update(dt){
         player.score += 80;
         setHint(`✨ 즉시 O₂ +${gain}!`);
       } else setHint("💧 물 주기 완료! 식물 옆에 잠깐 머물면 O₂를 얻습니다.");
-      player.waterCooldownMs = 900;
+      player.waterCooldownMs = 1000;
       break;
     }
   }
@@ -1054,14 +969,9 @@ function update(dt){
 
   for (const pl of plots){
     if (pl.planted && !pl.watered) pl.plantMs += dt;
-
-    // ✅ 성장 모션: watered 이후 grow가 0->1
-    if (pl.planted && pl.watered && !pl.o2Given){
-      pl.grow = clamp(pl.grow + dt/1200, 0, 1);
-    }
   }
 
-  // 위험물(가시/독성 구체)
+  // hazards
   for (const h of hazards){
     if (h.kind === "orb"){
       const speedMul = 1 + currentStageIndex*0.18;
@@ -1071,6 +981,22 @@ function update(dt){
     }
     if (player.invulnMs <= 0){
       if (overlap({x:player.x,y:player.y,w:player.w,h:player.h}, {x:h.x,y:h.y,w:h.w,h:h.h})){
+        if (h.kind==="orb" && upgrade.shields.poison > 0){
+          upgrade.shields.poison -= 1;
+          const st = owned.get("shield_poison");
+          if (st && st.usesLeft > 0){ st.usesLeft = 0; oneTimeUsed.add("shield_poison"); renderOwnedCards(); }
+          setHint("🟣 독성 보호막 발동!");
+          player.invulnMs = 450;
+          continue;
+        }
+        if (h.kind==="spike" && upgrade.shields.spike > 0){
+          upgrade.shields.spike -= 1;
+          const st = owned.get("shield_spike");
+          if (st && st.usesLeft > 0){ st.usesLeft = 0; oneTimeUsed.add("shield_spike"); renderOwnedCards(); }
+          setHint("🛡️ 가시 방패 발동!");
+          player.invulnMs = 450;
+          continue;
+        }
         const dmg = (h.kind==="spike") ? (18 + currentStageIndex*3) : (12 + currentStageIndex*3);
         player.hp -= dmg;
         player.invulnMs = 650;
@@ -1080,7 +1006,7 @@ function update(dt){
     }
   }
 
-  // Stage4 회오리 충돌
+  // stage4 tornado
   for (const tw of tornados){
     tw.t += dt * 0.002;
     const wobble = Math.sin(tw.t) * 10;
@@ -1095,7 +1021,7 @@ function update(dt){
     }
   }
 
-  // 사망
+  // death
   if (player.hp <= 0){
     player.hp = 0;
     stopLoop();
@@ -1112,7 +1038,7 @@ function update(dt){
 
   world.camX = clamp(player.x - W*0.35, 0, world.length - W);
 
-  // 식물 O2 회복
+  // plant O2 gain
   for (const pl of plots){
     if (!pl.planted) continue;
     if (!pl.watered) { pl.holdMs = 0; continue; }
@@ -1132,27 +1058,25 @@ function update(dt){
     } else pl.holdMs = 0;
   }
 
-  // 클리어(현재 스테이지)
+  // clear
   if (player.planted >= plots.length){
     stopLoop();
-
-    // ✅ Stage7(마지막) 클리어면 엔딩 화면
-    if (currentStageIndex >= STAGES.length - 1){
-      openDialogue(END_DIALOGUE, () => {
-        openEnd();
+    if (currentStageIndex < STAGES.length - 1){
+      openDialogue(
+        [
+          { name:"??", text:`${STAGES[currentStageIndex].name} 정화 완료.` },
+          { name:"로봇", text:"다음 구역으로 이동한다." },
+        ],
+        async () => { await goNextStage(); }
+      );
+    } else {
+      openDialogue(END_DIALOGUE, async () => {
+        openDialogue(
+          [{ name:"로봇", text:`임무 기록 종료. Score: ${player.score}  (재시작하려면 Space)` }],
+          async () => { resetAllGameState(); await runIntroAndStart(); }
+        );
       });
-      syncHud();
-      return;
     }
-
-    // 다음 스테이지
-    openDialogue(
-      [
-        { name:"??", text:`${STAGES[currentStageIndex].name} 정화 완료.` },
-        { name:"로봇", text:"다음 구역으로 이동한다." },
-      ],
-      async () => { await goNextStage(); }
-    );
     syncHud();
     return;
   }
@@ -1160,9 +1084,7 @@ function update(dt){
   syncHud();
 }
 
-// =====================
-// Render helpers (파동/파티클)
-/// =====================
+// ====== rendering helpers ======
 function drawPulseRing(cx, cy, baseR, t, strokeA, strokeB){
   const p = (Math.sin(t) + 1)/2;
   const r = baseR + p*6;
@@ -1177,72 +1099,29 @@ function drawPulseRing(cx, cy, baseR, t, strokeA, strokeB){
   ctx.beginPath(); ctx.arc(cx, cy, r-6, 0, Math.PI*2); ctx.stroke();
   ctx.restore();
 }
-
-function drawGreenBurst(cx, cy, t){
-  // ✅ 완성 시 빛 파동 + 초록 파티클 느낌
-  const p = (Math.sin(t*2)+1)/2;
+function drawTextTag(x, y, text){
   ctx.save();
-  ctx.globalAlpha = 0.22;
-  ctx.fillStyle = "rgba(120,255,170,1)";
-  ctx.beginPath();
-  ctx.arc(cx, cy, 10 + p*18, 0, Math.PI*2);
-  ctx.fill();
-
-  ctx.globalAlpha = 0.45;
-  ctx.strokeStyle = "rgba(120,255,170,0.9)";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.arc(cx, cy, 22 + p*26, 0, Math.PI*2);
-  ctx.stroke();
-  ctx.restore();
-
-  // 작은 점들
-  ctx.save();
-  ctx.globalAlpha = 0.6;
-  for (let i=0;i<8;i++){
-    const ang = i*(Math.PI*2/8) + t*0.8;
-    const rr = 10 + p*20;
-    const x = cx + Math.cos(ang)*rr;
-    const y = cy + Math.sin(ang)*rr;
-    ctx.fillStyle = "rgba(160,255,200,0.9)";
-    ctx.fillRect(x-1.5, y-1.5, 3, 3);
-  }
+  ctx.font = "12px system-ui";
+  ctx.fillStyle = "rgba(0,0,0,0.55)";
+  const w = ctx.measureText(text).width + 10;
+  ctx.fillRect(x-5, y-14, w, 16);
+  ctx.fillStyle = "rgba(255,255,255,0.92)";
+  ctx.fillText(text, x, y-2);
   ctx.restore();
 }
 
-function drawBackground(stage){
-  const src = stage?.bgImage;
-  const img = src ? BG_CACHE.get(src) : null;
-
-  if (img && img.complete && img.naturalWidth > 0){
-    ctx.drawImage(img, 0, 0, W, H);
-    return;
-  }
-
-  const g = ctx.createLinearGradient(0, 0, 0, H);
-  g.addColorStop(0, "rgb(40,45,70)");
-  g.addColorStop(1, "rgb(10,10,20)");
-  ctx.fillStyle = g;
-  ctx.fillRect(0,0,W,H);
-
-  ctx.save();
-  ctx.fillStyle = "rgba(255,255,255,0.75)";
-  ctx.font = "14px system-ui";
-  ctx.textAlign = "center";
-  ctx.fillText("배경 로딩 중… (폴더/경로 확인)", W/2, H/2);
-  ctx.restore();
-}
-
-// =====================
-// Render
-// =====================
 function render(){
   ctx.clearRect(0,0,W,H);
   const S = STAGES[currentStageIndex] || STAGES[0];
 
   drawBackground(S);
 
-  // 산성비 overlay
+  if (player.o2 <= 0.01){
+    ctx.fillStyle = "rgba(10,0,0,0.12)";
+    ctx.fillRect(0,0,W,H);
+  }
+
+  // acid overlay
   if (player.acidOn){
     ctx.save();
     ctx.globalAlpha = 0.18;
@@ -1255,7 +1134,7 @@ function render(){
     ctx.restore();
   }
 
-  // 빙결 overlay
+  // freeze overlay
   if (player.freezeMs > 0){
     ctx.save();
     ctx.globalAlpha = 0.18;
@@ -1267,7 +1146,7 @@ function render(){
   ctx.save();
   ctx.translate(-world.camX, 0);
 
-  // 플랫폼
+  // platforms
   for (const p of platforms){
     if (p.type==="ground"){
       ctx.fillStyle = "rgba(120,78,35,0.65)";
@@ -1288,24 +1167,19 @@ function render(){
     }
   }
 
-  // ✅ 씨앗(이미지)
-  const seedImg = loadImage(SPRITES.seed);
+  // seeds (simple)
+  ctx.fillStyle = "rgba(255,255,255,0.9)";
   for (const s of seeds){
     if (s.taken) continue;
-
-    if (seedImg && seedImg.complete && seedImg.naturalWidth > 0){
-      ctx.drawImage(seedImg, s.x, s.y, s.w, s.h);
-    } else {
-      ctx.fillStyle = "rgba(255,255,255,0.9)";
-      ctx.beginPath();
-      ctx.arc(s.x+s.w/2, s.y+s.h/2, 9, 0, Math.PI*2);
-      ctx.fill();
-      ctx.fillStyle = "rgba(60,220,140,0.9)";
-      ctx.fillRect(s.x+10, s.y+8, 4, 12);
-    }
+    ctx.beginPath();
+    ctx.arc(s.x+s.w/2, s.y+s.h/2, 9, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = "rgba(60,220,140,0.9)";
+    ctx.fillRect(s.x+10, s.y+8, 4, 12);
+    ctx.fillStyle = "rgba(255,255,255,0.9)";
   }
 
-  // 심는 자리 + 성장 모션 + 완성 이펙트
+  // plots
   const time = performance.now()*0.004;
   for (const pl of plots){
     ctx.fillStyle="rgba(20,16,10,0.65)";
@@ -1317,30 +1191,17 @@ function render(){
     if (!pl.planted){
       drawPulseRing(cx, cy, 16, time, "rgba(120,255,180,0.95)", "rgba(255,255,255,0.35)");
     } else {
-      // ✅ 새싹/성장 표현(간단한 모션)
-      const g = pl.watered ? pl.grow : 0;
-      const stemH = 8 + g*18;
-      ctx.save();
-      ctx.fillStyle = "rgba(120,255,180,0.92)";
-      ctx.fillRect(cx-2, pl.y - stemH, 4, stemH);
-      ctx.fillStyle = "rgba(140,255,200,0.92)";
-      ctx.beginPath();
-      ctx.ellipse(cx, pl.y - stemH, 8+g*10, 6+g*6, 0, 0, Math.PI*2);
-      ctx.fill();
-      ctx.restore();
-
       if (!pl.watered){
         drawPulseRing(cx, cy, 18, time+0.6, "rgba(255,230,140,0.95)", "rgba(255,255,255,0.20)");
+        drawTextTag(pl.x-10, pl.y-12, "WATER (F)");
       } else if (!pl.o2Given){
         drawPulseRing(cx, cy, 18, time+1.0, "rgba(255,170,90,0.95)", "rgba(120,255,180,0.22)");
-      } else {
-        // ✅ 완성 시 빛 파동/파티클
-        drawGreenBurst(cx, pl.y - 28, time);
+        drawTextTag(pl.x-10, pl.y-12, "HOLD…");
       }
     }
   }
 
-  // 위험물
+  // hazards
   for (const h of hazards){
     if (h.kind==="spike"){
       ctx.fillStyle="rgba(255,90,90,0.85)";
@@ -1360,23 +1221,23 @@ function render(){
     }
   }
 
-  // ✅ 토네이도(이미지)
-  const tornadoImg = loadImage(SPRITES.tornado);
+  // tornados
   for (const tw of tornados){
     const wobble = Math.sin(tw.t) * 10;
     const x = tw.x + wobble;
-    if (tornadoImg && tornadoImg.complete && tornadoImg.naturalWidth > 0){
-      ctx.drawImage(tornadoImg, x, tw.y, tw.w, tw.h);
-    } else {
-      ctx.save();
-      ctx.globalAlpha = 0.35;
-      ctx.fillStyle = "rgba(255,230,180,0.75)";
-      ctx.fillRect(x, tw.y, tw.w, tw.h);
-      ctx.restore();
-    }
+    ctx.save();
+    ctx.globalAlpha = 0.35;
+    ctx.fillStyle = "rgba(255,230,180,0.75)";
+    ctx.beginPath();
+    ctx.ellipse(x+tw.w/2, tw.y+tw.h/2, tw.w/2, tw.h/2, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.globalAlpha = 0.45;
+    ctx.strokeStyle = "rgba(255,255,255,0.35)";
+    ctx.strokeRect(x, tw.y, tw.w, tw.h);
+    ctx.restore();
   }
 
-  // 플레이어(이미지)
+  // player sprite
   const blink = player.invulnMs > 0 && Math.floor(performance.now()/80)%2===0;
   ctx.globalAlpha = blink ? 0.35 : 1;
 
@@ -1390,6 +1251,7 @@ function render(){
   ctx.save();
   ctx.translate(dx + dWidth / 2, dy + dHeight / 2);
   ctx.scale(player.direction, 1);
+
   if (player.image.complete && player.image.naturalWidth > 0){
     ctx.drawImage(player.image, -dWidth / 2, -dHeight / 2, dWidth, dHeight);
   } else {
@@ -1397,35 +1259,47 @@ function render(){
     ctx.fillRect(-dWidth/2, -dHeight/2, dWidth, dHeight);
   }
   ctx.restore();
-  ctx.globalAlpha = 1;
 
+  ctx.globalAlpha = 1;
   ctx.restore();
 }
 
-// =====================
-// Boot (✅ async 수정!!)
-/// =====================
+// ====== start ======
+async function runIntroAndStart(){
+  resetAllGameState();
+  openDialogue(INTRO_DIALOGUE, async () => {
+    await showLoadingLine();
+    await beginStage(0, true);
+    setHint("←/→ 이동, Space 점프, E 심기, F 물주기, Q 재시작, R 카드발동, Shift AUTO");
+    renderOwnedCards();
+    if (!running) startLoop();
+  });
+}
+
+// ====== BOOT (async 필수) ======
 (async function boot(){
   close(overlay);
   close(loading);
   close(dialogue);
 
-  // ✅ preload backgrounds
+  // ✅ 배경 먼저 전부 프리로드 (이게 배경 PNG 문제를 끝내는 핵심)
   await preloadStageBackgrounds();
 
-  // ✅ player sprite
-  player.image.src = SPRITES.robot;
+  // ✅ 플레이어 이미지도 안전 경로
+  player.image.src = resolveAsset("robot.png");
   player.image.onload = () => {
     player.imgWidth = player.image.width;
     player.imgHeight = player.image.height;
   };
 
-  // Start screen 먼저 띄움
-  openStart();
+  openDialogue(
+    [
+      { name:"??", text:"…신호 수신. 복구 시스템 온라인." },
+      { name:"??", text:"유닛을 깨운다." },
+    ],
+    async () => { await runIntroAndStart(); }
+  );
 
   render();
   renderOwnedCards();
-
-  // 루프는 돌려놓고, gameRunning이 false면 update 안 됨
-  if (!running) startLoop();
 })();
