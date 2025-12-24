@@ -21,152 +21,169 @@
 }
 
 *{ box-sizing:border-box; }
-html,body{ height:100%; }
+html, body{ height:100%; }
 body{
   margin:0;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", Arial, sans-serif;
   background: radial-gradient(1200px 700px at 30% 10%, #162238 0%, var(--bg) 55%);
   color: var(--text);
-  overflow-x:hidden;
 }
 
-/* ===== 레이아웃: 좌 HUD + 우 캔버스 ===== */
-.wrap{
-  width:min(1320px, 96vw);
-  margin: 0 auto;
-  padding: 16px;
+.wrap{ max-width: 1280px; margin: 0 auto; padding: 16px; }
+
+/* =======================
+   TOPBAR
+======================= */
+.topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:16px; padding: 12px 14px; border-radius: 16px;
+  background: linear-gradient(180deg, rgba(18,26,36,.86), rgba(10,14,20,.86));
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(255,255,255,.06);
+}
+
+.brand{ display:flex; align-items:center; gap:12px; min-width: 240px; }
+.brandIcon{
+  width: 44px; height: 44px;
+  border-radius: 14px;
   display:grid;
-  grid-template-columns: 320px 1fr;
-  gap: 16px;
+  place-items:center;
+  position: relative;
+  background: linear-gradient(135deg, rgba(83,200,255,.22), rgba(154,123,255,.18));
+  border: 1px solid rgba(255,255,255,.14);
+  box-shadow: 0 10px 24px rgba(0,0,0,.28), 0 0 26px rgba(90,180,255,.18);
+}
+.brandBot{ position:absolute; left:10px; top:10px; font-size: 18px; }
+.brandLeaf{ position:absolute; right:10px; bottom:10px; font-size: 18px; }
+.brandText{ display:flex; flex-direction:column; gap:2px; }
+.brandName{ font-weight: 900; letter-spacing: .2px; }
+.brandSub{ color: var(--muted); font-size: 12px; }
+
+/* HUD pills */
+.hud{ display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-end; }
+.hudItem{
+  background: rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius: 999px;
+  padding: 8px 12px;
+  display:flex; gap:10px; align-items:center;
+  min-width: 120px;
+}
+.hudItem .k{ color: var(--muted); font-size: 12px; }
+.hudItem .v{ font-weight: 900; }
+
+/* =======================
+   LAYOUT
+======================= */
+.main{
+  margin-top: 14px;
+  display:grid;
+  grid-template-columns: 1fr 320px;
+  gap: 14px;
   align-items:start;
 }
 
-/* ===== HUD(왼쪽 패널) ===== */
-.hud{
-  position: sticky;
-  top: 16px;
-  display:flex;
-  flex-direction:column;
-  gap: 14px;
-  padding: 14px;
-  border-radius: 18px;
-  background: linear-gradient(180deg, rgba(18,26,36,.86), rgba(10,14,20,.86));
-  border: 1px solid rgba(255,255,255,.06);
-  box-shadow: var(--shadow);
-  min-height: calc(100vh - 32px);
-}
+.gameFrame{ position: relative; }
 
-.title{
-  margin: 4px 0 0;
-  line-height: 1.02;
-  letter-spacing: .4px;
-  font-weight: 950;
-  font-size: 34px;
-  color: #cfe1ff;
-}
-
-.hudBox{
-  margin-top: 6px;
-  border-radius: 16px;
-  padding: 10px 10px;
-  background: rgba(255,255,255,.04);
-  border: 1px solid rgba(255,255,255,.08);
-}
-.hudBox .row{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding: 8px 6px;
-  border-bottom: 1px solid rgba(255,255,255,.06);
-}
-.hudBox .row:last-child{ border-bottom:0; }
-.hudBox .row span{ color: rgba(210,225,255,.78); font-size: 13px; }
-.hudBox .row b{ font-weight: 950; letter-spacing:.2px; }
-
-.cardsTitle, .hintTitle{
-  font-weight: 950;
-  color: #cfe1ff;
-  letter-spacing: .2px;
-  margin-top: 2px;
-}
-.ownedCards{
-  display:flex;
-  flex-direction:column;
-  gap: 8px;
-  max-height: 240px;
-  overflow:auto;
-  padding-right: 4px;
-}
-.ownedCard{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  background: rgba(255,255,255,.05);
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 14px;
-  padding: 10px 10px;
-}
-.ownedCard .emo{ font-size: 18px; }
-
-.hint{
-  color: var(--muted);
-  line-height: 1.55;
-  font-size: 13px;
-  background: rgba(255,255,255,.04);
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 14px;
-  padding: 10px;
-}
-
-.stageRule{
-  margin-top: auto;
-  color: rgba(210,225,255,.80);
-  font-weight: 900;
-  letter-spacing:.2px;
-  padding: 10px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(83,200,255,.20);
-  background: linear-gradient(135deg, rgba(83,200,255,.12), rgba(154,123,255,.10));
-  box-shadow: 0 0 0 2px rgba(83,200,255,.08) inset;
-  display:none;
-}
-.stageRule.is-on{ display:block; }
-.stageRule .tag{
-  display:inline-block;
-  margin-right: 8px;
-  font-size: 11px;
-  padding: 3px 8px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.14);
-  background: rgba(0,0,0,.18);
-  color: rgba(235,245,255,.9);
-}
-
-/* ===== 게임 영역(오른쪽) ===== */
-.gameArea{
-  position: relative;
-  display:flex;
-  flex-direction:column;
-  align-items:stretch;
-  gap: 0;
-}
-
-/* 캔버스가 아래로 밀리는 문제 방지: display:block + 상단 고정 */
 #gameCanvas{
+  width:100%;
+  height:auto;
   display:block;
-  width: 100%;
-  height: auto;
-  max-width: 980px;         /* 너무 넓어지면 보기 안 좋아서 상한 */
   border-radius: 18px;
   background: #0a0f15;
   border: 1px solid rgba(255,255,255,.08);
   box-shadow: var(--shadow);
 }
 
-/* ===== 카드 선택 오버레이 ===== */
+/* =======================
+   RIGHT SIDE PANELS
+======================= */
+.side{ display:flex; flex-direction:column; gap: 14px; }
+
+.panelBox{
+  background: linear-gradient(180deg, rgba(18,26,36,.86), rgba(10,14,20,.86));
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  padding: 14px;
+}
+
+.panelTitle{
+  font-weight: 950;
+  margin-bottom: 10px;
+  color: #cfe1ff;
+  letter-spacing: .2px;
+}
+
+.ownedCards{
+  display:flex;
+  flex-direction:column;
+  gap: 8px;
+  max-height: 300px;
+  overflow:auto;
+  padding-right: 4px;
+}
+
+.ownedCard{
+  display:flex; align-items:center; gap:10px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 14px;
+  padding: 10px;
+}
+.ownedCard .emo{ font-size: 18px; }
+.ownedCard .name{ font-weight: 900; }
+.ownedCard .sub{ color: var(--muted); font-size: 12px; margin-top:2px; }
+
+.hint{
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 13px;
+}
+
+.ruleBox{
+  color: rgba(235,245,255,.9);
+  font-weight: 800;
+  font-size: 13px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.04);
+}
+
+/* =======================
+   WARN OVERLAY (O2 0)
+======================= */
+.warnOverlay{
+  position:absolute;
+  inset: 14px 14px auto auto;
+  pointer-events:none;
+  display:none;
+}
+.warnOverlay.is-on{ display:block; }
+
+.warnChip{
+  display:flex; align-items:center; gap:10px;
+  padding: 10px 12px;
+  border-radius: 999px;
+  background: rgba(255,60,90,.12);
+  border: 1px solid rgba(255,60,90,.28);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 24px rgba(0,0,0,.25);
+}
+.warnDot{
+  width:10px; height:10px; border-radius:999px;
+  background: rgba(255,80,110,1);
+  box-shadow: 0 0 14px rgba(255,80,110,.55);
+}
+.warnTxt{ font-size: 12px; color: rgba(255,230,240,.9); font-weight: 950; }
+
+/* =======================
+   CARD OVERLAY
+======================= */
 .overlay{
-  position: fixed;
-  inset: 0;
+  position:fixed;
+  inset:0;
   display:none;
   place-items:center;
   background: rgba(0,0,0,.62);
@@ -176,62 +193,48 @@ body{
 .overlay.is-open{ display:grid; }
 
 .overlayPanel{
-  width: min(980px, 94vw);
-  border-radius: 18px;
-  padding: 16px;
+  width:min(980px, 94vw);
   background: linear-gradient(180deg, rgba(18,26,36,.98), rgba(10,14,20,.98));
   border: 1px solid rgba(255,255,255,.10);
+  border-radius: 18px;
+  padding: 16px;
   box-shadow: var(--shadow);
 }
-.overlayTop{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-.overlayTitle{
-  font-size: 18px;
-  font-weight: 950;
-  color:#cfe1ff;
-}
-.overlayTimer{
-  color: var(--muted);
-  font-size: 13px;
-  border: 1px solid rgba(255,255,255,.10);
-  background: rgba(255,255,255,.04);
-  border-radius: 999px;
-  padding: 6px 10px;
-}
+
+.overlayTop{ display:flex; justify-content:space-between; align-items:center; gap: 10px; }
+.overlayTitle{ font-size: 18px; font-weight: 950; }
+.overlayTimer{ color: var(--muted); font-size: 13px; }
 
 .cardRow{
   display:grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
+  margin-top: 12px;
 }
+
 .card{
   border-radius: 16px;
   padding: 14px;
   cursor:pointer;
   min-height: 168px;
   background: rgba(255,255,255,.05);
-  transition: transform .08s ease, box-shadow .08s ease, border-color .08s ease, filter .08s ease;
+  transition: transform .08s ease, box-shadow .08s ease, border-color .08s ease;
   border: 3px solid rgba(255,255,255,.10);
 }
-.card:hover{
-  transform: translateY(-2px);
-  filter: brightness(1.05);
-}
+.card:hover{ transform: translateY(-2px); }
+
 .card .rarity{ font-size: 12px; color: var(--muted); margin-bottom: 6px; }
 .card .name{ font-weight: 950; font-size: 16px; margin-bottom: 6px; }
 .card .emoji{ font-size: 28px; margin-bottom: 8px; }
 .card .desc{ color: #c7d7f5; font-size: 13px; line-height: 1.45; }
 
-/* 희귀도 테두리(확 띄게) */
+.overlayHint{ margin-top: 10px; color: var(--muted); font-size: 12px; }
+
+/* 희귀도별 테두리 */
 .r-common{ border-color: color-mix(in srgb, var(--c-common) 92%, white 8%); }
 .r-rare{
   border-color: var(--c-rare);
-  box-shadow: 0 0 0 2px rgba(74,163,255,.25) inset, 0 0 22px rgba(74,163,255,.22);
+  box-shadow: 0 0 0 2px rgba(74,163,255,.25) inset, 0 0 20px rgba(74,163,255,.22);
 }
 .r-epic{
   border-color: var(--c-epic);
@@ -239,13 +242,15 @@ body{
 }
 .r-legendary{
   border-color: var(--c-legend);
-  box-shadow: 0 0 0 2px rgba(255,59,59,.25) inset, 0 0 36px rgba(255,59,59,.30);
+  box-shadow: 0 0 0 2px rgba(255,59,59,.25) inset, 0 0 34px rgba(255,59,59,.28);
 }
 
-/* ===== 로딩 ===== */
+/* =======================
+   LOADING
+======================= */
 .loading{
-  position: fixed;
-  inset: 0;
+  position:fixed;
+  inset:0;
   display:none;
   place-items:center;
   background: rgba(0,0,0,.86);
@@ -262,170 +267,172 @@ body{
   box-shadow: var(--shadow);
   text-align:center;
 }
+
 .spinner{
   width: 34px;
   height: 34px;
-  border-radius: 999px;
+  border-radius: 50%;
+  margin: 6px auto 12px;
   border: 3px solid rgba(255,255,255,.18);
-  border-top-color: rgba(83,200,255,.9);
-  margin: 0 auto 10px;
-  animation: spin 1s linear infinite;
+  border-top-color: rgba(255,255,255,.75);
+  animation: spin 0.85s linear infinite;
 }
-@keyframes spin{ to{ transform: rotate(360deg); } }
+@keyframes spin{
+  to { transform: rotate(360deg); }
+}
+
 .loadingText{
   color:#c7d7f5;
   line-height:1.6;
   font-size: 14px;
+  font-weight: 800;
 }
 
-/* ===== 산소 0 경고 ===== */
-.warnOverlay{
-  position: fixed;
-  top: 18px;
-  right: 18px;
-  z-index: 70;
-  display:none;
-  pointer-events:none;
-}
-.warnOverlay.is-on{ display:block; }
-.warnOverlay{
-  padding: 10px 12px;
-  border-radius: 999px;
-  background: rgba(255,60,90,.12);
-  border: 1px solid rgba(255,60,90,.28);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 10px 24px rgba(0,0,0,.25);
-  color: rgba(255,230,240,.92);
-  font-weight: 950;
-  font-size: 12px;
-}
-
-/* ===== 대화창 (블루아카 느낌을 "현재 HTML 구조"로 구현) ===== */
+/* =======================
+   DIALOGUE (Blue Archive-ish)
+======================= */
 .dialogue{
-  position: fixed;
-  left: 0; right: 0;
-  bottom: 0;
-  padding: 18px 18px 22px;
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  padding: 18px 18px 18px;
   z-index: 55;
-  pointer-events:none;
+  pointer-events: none;
   display:none;
 }
 .dialogue.is-open{ display:block; }
 
-.dialogue .dlgTop{
+.dlgInner{
   max-width: 1200px;
   margin: 0 auto;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap: 12px;
-  padding: 12px 14px;
+  display:grid;
+  grid-template-columns: 140px 1fr;
+  gap: 14px;
+  align-items:end;
+}
+
+.dlgPortrait{
+  position: relative;
+  width: 140px;
+  height: 140px;
+  pointer-events:none;
+}
+
+.avatarGlow{
+  position:absolute;
+  inset: -14px;
+  border-radius: 30px;
+  background: radial-gradient(circle at 30% 30%, rgba(83,200,255,.35), transparent 55%),
+              radial-gradient(circle at 70% 70%, rgba(154,123,255,.22), transparent 55%);
+  filter: blur(10px);
+  opacity: .85;
+  z-index: -1;
+}
+
+.avatar{
+  width: 120px;
+  height: 120px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(83,200,255,.22), rgba(154,123,255,.18));
+  border: 1px solid rgba(255,255,255,.16);
+  box-shadow: 0 12px 26px rgba(0,0,0,.35), 0 0 30px var(--ba-glow);
+  display:grid;
+  place-items:center;
+  backdrop-filter: blur(10px);
+  overflow:hidden;
+}
+.avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.dlgBox{
+  pointer-events: auto;
   background: linear-gradient(180deg, var(--ba-panel), var(--ba-panel2));
   border: 1px solid var(--ba-stroke);
-  border-radius: 18px 18px 0 0;
+  border-radius: 18px;
   box-shadow: 0 16px 34px rgba(0,0,0,.42);
-  pointer-events:auto;
+  overflow:hidden;
 }
-.dlgAvatar{
-  width: 74px;
-  height: 74px;
-  border-radius: 16px;
-  border: 1px solid rgba(255,255,255,.16);
-  background: linear-gradient(135deg, rgba(83,200,255,.22), rgba(154,123,255,.18));
-  box-shadow: 0 12px 26px rgba(0,0,0,.35), 0 0 30px var(--ba-glow);
-  object-fit: cover;
-}
-.dlgMeta{
-  flex:1;
+
+.dlgTop{
   display:flex;
-  flex-direction:column;
-  gap: 4px;
-  min-width: 0;
+  justify-content:space-between;
+  align-items:center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
 }
+
+.namePlate{
+  display:flex;
+  align-items:baseline;
+  gap: 10px;
+}
+
 .dlgName{
   font-weight: 950;
-  letter-spacing:.2px;
-  font-size: 16px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  letter-spacing: .2px;
 }
+
 .dlgRole{
   font-size: 11px;
   color: rgba(210,225,255,.62);
-  display:inline-block;
-  width: fit-content;
   padding: 3px 8px;
   border-radius: 999px;
   border: 1px solid rgba(255,255,255,.10);
   background: rgba(255,255,255,.05);
 }
-.dlgBtns{ display:flex; gap: 8px; }
-.btn{
+
+.dlgControls{ display:flex; gap: 8px; }
+
+.miniBtn{
   border: 1px solid rgba(255,255,255,.12);
   background: rgba(255,255,255,.06);
   color: rgba(235,245,255,.88);
-  border-radius: 12px;
-  padding: 7px 10px;
-  font-weight: 850;
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-weight: 900;
   font-size: 12px;
   cursor:pointer;
 }
-.btn:hover{ background: rgba(255,255,255,.10); }
+.miniBtn:hover{ background: rgba(255,255,255,.10); }
 
-.dialogue .dlgText{
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 14px 14px 10px;
-  background: linear-gradient(180deg, rgba(16,22,34,.78), rgba(10,14,20,.82));
-  border-left: 1px solid var(--ba-stroke);
-  border-right: 1px solid var(--ba-stroke);
-  box-shadow: 0 16px 34px rgba(0,0,0,.42);
-  pointer-events:auto;
+.dlgBubble{ padding: 14px 14px 10px; }
+
+.dlgText{
   font-size: 15px;
-  line-height: 1.85;
+  line-height: 1.8;
   color: rgba(235,245,255,.92);
-  min-height: 72px;
+  min-height: 62px;
+  white-space: pre-wrap;
 }
-.dialogue .dlgBottom{
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 10px 14px 0;
-  background: linear-gradient(180deg, rgba(16,22,34,.78), rgba(10,14,20,.82));
-  border: 1px solid var(--ba-stroke);
-  border-top: 0;
-  border-radius: 0 0 18px 18px;
-  box-shadow: 0 16px 34px rgba(0,0,0,.42);
-  pointer-events:auto;
+
+.dlgHint{
+  display:flex;
+  justify-content:space-between;
+  margin-top: 10px;
+  font-size: 11px;
+  color: rgba(210,225,255,.55);
 }
+
 .dlgNext{
+  max-width: 1200px;
+  margin: 8px auto 0;
   text-align:right;
+  padding-right: 20px;
   color: rgba(180,210,255,.85);
   font-weight: 950;
-  opacity: 0;
-  transform: translateY(6px);
-  transition: .12s ease;
-  user-select:none;
-}
-.dialogue.is-open .dlgNext{
-  opacity: 1;
-  transform: translateY(0);
+  opacity: .9;
+  pointer-events:none;
 }
 
-/* ===== 반응형 ===== */
-@media (max-width: 980px){
-  .wrap{
-    grid-template-columns: 1fr;
-  }
-  .hud{
-    position: relative;
-    top: auto;
-    min-height: auto;
-  }
-  #gameCanvas{
-    max-width: 100%;
-  }
-  .cardRow{
-    grid-template-columns: 1fr;
-  }
+/* =======================
+   RESPONSIVE
+======================= */
+@media (max-width: 1100px){
+  .main{ grid-template-columns: 1fr; }
+  .side{ order: 2; }
+  .hud{ justify-content:flex-start; }
 }
