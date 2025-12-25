@@ -1,10 +1,6 @@
-window.addEventListener('resize', () => {
-    const canvas = document.getElementById('gameCanvas');
-
 // game.js (type="module")
 import { baseStages7, rand } from "./stages.js";
 import { SPEAKERS, INTRO_DIALOGUE, END_DIALOGUE, stageEnterDialogue } from "./dialogue.js";
-
 
 const BASE_URL = new URL("./", import.meta.url); // ✅ 모든 경로를 여기 기준으로 안전하게
 
@@ -251,11 +247,11 @@ function showDialogueLine(){
     dlgOnDone();
     return;
   }
+
+  // ✅ name 대신 speaker를 먼저 찾도록 수정 (ROBOT 표시를 위해)
+  const speakerKey = line.speaker || line.name || "SYSTEM";
+  setSpeakerUI(speakerKey); 
   
-  // ✅ 수정됨: dialogue.js의 'speaker' 속성을 먼저 확인하고, 없으면 'name'을 확인
-  const speakerKey = line.speaker || line.name; 
-  
-  setSpeakerUI(speakerKey);
   typeText(line.text || "");
 }
 function skipTyping(){
@@ -1303,29 +1299,31 @@ async function runIntroAndStart(){
   });
 }
 
-// game.js 맨 끝부분 수정 (이걸로 덮어쓰세요)
-window.initGame = async function() {
-  close(overlay);
-  close(loading);
-  close(dialogue);
+// 기존 (async function boot(){...})() 를 통째로 지우고 이걸 넣으세요.
+document.addEventListener('DOMContentLoaded', () => {
+  const startBtn = document.getElementById('start-btn');
+  if (startBtn) {
+    startBtn.onclick = async () => {
+      // 메뉴 숨기고 게임판 보이기
+      document.getElementById('main-menu').style.display = 'none';
+      // 만약 HTML에서 감싸는 div가 없다면 이 줄은 무시해도 되지만, 
+      // 화면이 겹치면 game-container를 display:block 하세요.
 
-  await preloadStageBackgrounds();
+      // 게임 초기화 및 첫 대사 시작
+      close(overlay);
+      close(loading);
+      close(dialogue);
+      await preloadStageBackgrounds();
+      player.image.src = resolveAsset("robot.png");
 
-  player.image.src = resolveAsset("robot.png");
-  player.image.onload = () => {
-    player.imgWidth = player.image.width;
-    player.imgHeight = player.image.height;
-  };
-
-  // 아바타 문제 해결 코드 포함됨 (speaker || name)
-  openDialogue(
-    [
-      { speaker:"SYSTEM", text:"...신호 수신. 복구 시스템 온라인." },
-      { speaker:"SYSTEM", text:"...유닛을 깨운다." },
-    ],
-    async () => { await runIntroAndStart(); }
-  );
-
-  render();
-  renderOwnedCards();
-};
+      openDialogue(
+        [
+          { speaker: "SYSTEM", text: "...신호 수신. 복구 시스템 온라인." },
+          { speaker: "SYSTEM", text: "...유닛을 깨운다." },
+        ],
+        async () => { await runIntroAndStart(); }
+      );
+      render();
+    };
+  }
+});
