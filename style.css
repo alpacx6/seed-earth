@@ -184,13 +184,14 @@ box-shadow: 0 10px 20px rgba(0,0,0,.18) inset;
 }
 /* ✅ 캔버스를 영역에 "딱" 맞추되, JS 내부 해상도는 유지 */
 .right {
-    width: 340px; /* min-width 대신 고정 width 사용 추천 */
-    flex-shrink: 0; /* grid 안에서 줄어들지 않도록 고정 */
-    height: 100%;
+    width: 260px; 
+    flex-shrink: 0;
     display: flex;
-    flex-direction: column;
+    flex-direction: column; /* 위에서 아래로 배치 */
     gap: 14px;
-    justify-content: center;
+    /* 3. 패널들이 위쪽부터 차곡차곡 쌓이도록 함 */
+    justify-content: flex-start; 
+    padding-top: 10px;
 }
 
 /* ================= RIGHT PANELS ================= */
