@@ -11,13 +11,16 @@
 
   <div id="main-menu" class="screen">
         <h1>SUPER WEB GAME</h1>
-        <button class="start-btn" onclick="startGame()">GAME START</button>
+        <button id="start-btn" class="start-btn">GAME START</button>
     </div>
 
-    <div id="game-screen" class="screen">
-        <p>게임 플레이 중...</p>
+    <div id="game-screen" class="screen" style="display: none;">
+        <div class="game-ui">
+            <p>게임이 시작되었습니다!</p>
+            <span>플레이어 조작 등을 여기에 구현하세요.</span>
         </div>
-
+    </div>
+  
   <div class="stage-banner">
         STAGE 1 - 시작의 숲
     </div>
