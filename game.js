@@ -59,14 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // 기존 CSS에서 .app이 flex로 잡혀있다면 'flex'라고 써주세요.
             gameContainer.style.display = 'flex'; 
 
-            // 3. 스테이지 배너 보여주고 애니메이션 시작
-            stageBanner.style.display = 'block';
-            stageBanner.classList.add('animate-stage');
-
-            // 4. 애니메이션 종료 후 배너 숨기기
-            setTimeout(() => {
-                stageBanner.style.display = 'none';
-            }, 3000);
         });
     }
 });
@@ -252,15 +244,39 @@ typingTimer = setTimeout(step, speed);
 step();
 }
 function showDialogueLine(){
-const line = dlgLines[dlgIdx];
-if (!line){
-closeDialogue();
-dlgOnDone();
-return;
+    const line = dlgLines[dlgIdx];
+    
+    // 대화 리스트가 더 이상 없을 때 (종료 시점)
+    if (!line){
+        closeDialogue(); // 대화창 닫기
+        
+        // 배너를 띄우는 로직 추가
+        setTimeout(() => {
+            showStageBanner("STAGE 1 - 시작의 숲");
+        }, 500); // 대화창이 닫히고 0.5초 뒤에 배너 등장
+
+        dlgOnDone(); // 기존에 설정된 종료 후 콜백 실행
+        return;
+    }
+    
+    setSpeakerUI(line.name);
+    typeText(line.text || "");
+function showStageBanner(text) {
+    const banner = document.getElementById('stage-banner');
+    if (!banner) return;
+
+    banner.innerText = text;
+    banner.style.display = 'block';
+    banner.classList.add('animate-stage');
+
+    // 3초 후 배너 숨기기 및 클래스 초기화
+    setTimeout(() => {
+        banner.style.display = 'none';
+        banner.classList.remove('animate-stage');
+    }, 3000);
 }
-setSpeakerUI(line.name);
-typeText(line.text || "");
-}
+
+    
 function skipTyping(){
 if (!dlgTyping) return;
 dlgTyping = false;
