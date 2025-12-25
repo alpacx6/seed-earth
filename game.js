@@ -44,22 +44,23 @@ const uiTotal = document.getElementById("total");
 const uiScore = document.getElementById("score");
 const uiHint = document.getElementById("hint");
 
+// game.js 맨 윗부분 수정
 document.addEventListener('DOMContentLoaded', () => {
     const startBtn = document.getElementById('start-btn');
     const mainMenu = document.getElementById('main-menu');
-    const gameContainer = document.getElementById('game-container'); // .app 부분
-    const stageBanner = document.getElementById('stage-banner');
+    // 아까 HTML에 추가한 game-container를 찾습니다.
+    const gameContainer = document.getElementById('game-container'); 
 
     if (startBtn) {
         startBtn.addEventListener('click', () => {
-            // 1. 메인 메뉴 숨기기
+            // 메뉴를 숨기고 게임 화면을 보여줍니다.
             mainMenu.style.display = 'none';
-
-            // 2. 게임 화면 보이기
             gameContainer.style.display = 'block'; 
 
-            // 5. 게임 엔진 시작 함수가 있다면 여기서 호출
-            // if (typeof initGame === 'function') initGame();
+            // 게임을 시작시킵니다.
+            if (typeof initGame === 'function') {
+                initGame();
+            }
         });
     }
 });
@@ -1302,30 +1303,29 @@ async function runIntroAndStart(){
   });
 }
 
-// ====== BOOT (async 필수) ======
-(async function boot(){
+// game.js 맨 끝부분 수정 (이걸로 덮어쓰세요)
+window.initGame = async function() {
   close(overlay);
   close(loading);
   close(dialogue);
 
-  // ✅ 배경 먼저 전부 프리로드 (이게 배경 PNG 문제를 끝내는 핵심)
   await preloadStageBackgrounds();
 
-  // ✅ 플레이어 이미지도 안전 경로
   player.image.src = resolveAsset("robot.png");
   player.image.onload = () => {
     player.imgWidth = player.image.width;
     player.imgHeight = player.image.height;
   };
 
+  // 아바타 문제 해결 코드 포함됨 (speaker || name)
   openDialogue(
     [
-      { name:"SYSTEM", text:"...신호 수신. 복구 시스템 온라인." },
-      { name:"SYSTEM", text:"...유닛을 깨운다." },
+      { speaker:"SYSTEM", text:"...신호 수신. 복구 시스템 온라인." },
+      { speaker:"SYSTEM", text:"...유닛을 깨운다." },
     ],
     async () => { await runIntroAndStart(); }
   );
 
   render();
   renderOwnedCards();
-})();
+};
