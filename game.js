@@ -1,10 +1,11 @@
-// game.js (수정 완료 버전)
+
+// game.js (type="module")
 import { baseStages7, rand } from "./stages.js";
 import { SPEAKERS, INTRO_DIALOGUE, END_DIALOGUE, stageEnterDialogue } from "./dialogue.js";
 
 console.log("game.js LOADED (FINAL)");
 
-const BASE_URL = new URL("./", import.meta.url);
+const BASE_URL = new URL("./", import.meta.url); // ✅ 모든 경로를 여기 기준으로 안전하게
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -42,39 +43,38 @@ const uiTotal = document.getElementById("total");
 const uiScore = document.getElementById("score");
 const uiHint = document.getElementById("hint");
 
-// UI 요소 미리 선언
+document.addEventListener('DOMContentLoaded', () => {
 const startBtn = document.getElementById('start-btn');
 const mainMenu = document.getElementById('main-menu');
 const gameContainer = document.getElementById('game-container');
+const stageBanner = document.getElementById('stage-banner');
 
-// ====== 시작 버튼 로직 (중복 제거 및 통합) ======
 if (startBtn) {
-    startBtn.addEventListener('click', () => {
-        mainMenu.style.display = 'none';
-        gameContainer.style.display = 'flex';
+startBtn.addEventListener('click', () => {
+// 1. 메인 메뉴 숨기기
+mainMenu.style.display = 'none';
 
-        // 인트로 대화 시작 -> 끝나면 배너 실행
-        openDialogue(INTRO_DIALOGUE, () => {
-            console.log("인트로 완료! 스테이지 배너를 호출합니다.");
-            setTimeout(() => {
-                triggerStageBanner("STAGE 1 - 시작의 숲");
-            }, 500);
-        });
-    });
+// 2. 게임 화면(.app) 나타내기
+// 기존 CSS에서 .app이 flex로 잡혀있다면 'flex'라고 써주세요.
+gameContainer.style.display = 'flex'; 
+
+});
 }
+});
+
 
 // ====== utils ======
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 function overlap(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
-function open(el){ if(el) el.classList.add("is-open"); }
-function close(el){ if(el) el.classList.remove("is-open"); }
+function open(el){ el.classList.add("is-open"); }
+function close(el){ el.classList.remove("is-open"); }
 function setHint(msg){ uiHint.textContent = msg || ""; }
 
 // ====== stage rule box ======
 function setStageRuleBox(stage){
-    if (!stage?.ruleText) { stageRuleOverlay.classList.remove("is-on"); return; }
-    stageRuleOverlay.innerHTML = `<span class="tag">RULE</span>${stage.ruleText}`;
-    stageRuleOverlay.classList.add("is-on");
+if (!stage?.ruleText) { stageRuleOverlay.classList.remove("is-on"); return; }
+stageRuleOverlay.innerHTML = `<span class="tag">RULE</span>${stage.ruleText}`;
+stageRuleOverlay.classList.add("is-on");
 }
 
 // ====== loop control ======
@@ -83,25 +83,25 @@ let lastT = 0;
 let rafId = null;
 
 function stopLoop() {
-    running = false;
-    if (rafId !== null) cancelAnimationFrame(rafId);
-    rafId = null;
+running = false;
+if (rafId !== null) cancelAnimationFrame(rafId);
+rafId = null;
 }
 function startLoop() {
-    running = true;
-    lastT = performance.now();
-    if (rafId !== null) cancelAnimationFrame(rafId);
-    rafId = requestAnimationFrame(loop);
+running = true;
+lastT = performance.now();
+if (rafId !== null) cancelAnimationFrame(rafId);
+rafId = requestAnimationFrame(loop);
 }
 
 // ====== input ======
 const held = new Set();
 const pressed = new Set();
 addEventListener("keydown", (e) => {
-    const block = ["ArrowLeft","ArrowRight","ArrowUp"," ","KeyA","KeyD","KeyW","KeyE","KeyF","KeyQ","KeyR","ShiftLeft","ShiftRight"];
-    if (block.includes(e.code)) e.preventDefault();
-    if (!held.has(e.code)) pressed.add(e.code);
-    held.add(e.code);
+const block = ["ArrowLeft","ArrowRight","ArrowUp"," ","KeyA","KeyD","KeyW","KeyE","KeyF","KeyQ","KeyR","ShiftLeft","ShiftRight"];
+if (block.includes(e.code)) e.preventDefault();
+if (!held.has(e.code)) pressed.add(e.code);
+held.add(e.code);
 });
 addEventListener("keyup", (e) => held.delete(e.code));
 function wasPressed(code) { if (pressed.has(code)) { pressed.delete(code); return true; } return false; }
@@ -117,18 +117,55 @@ const seeds = [];
 const plots = [];
 const tornados = [];
 
-const world = { camX: 0, length: 3600, maxSpeedBase: 5.0, frictionNearGround: 0.84 };
+const world = {
+camX: 0,
+length: 3600,
+maxSpeedBase: 5.0,
+frictionNearGround: 0.84,
+};
 
 const player = {
-    x: 120, y: 250, w: 40, h: 60, vx: 0, vy: -12, onGround: false,
-    hp: 100, maxHpBase: 100, maxHpBonus: 0,
-    o2: 50, maxO2Base: 50, maxO2Bonus: 0,
-    seedInv: 0, planted: 0, score: 0,
-    invulnMs: 0, jumpsMax: 1, extraJumpUsed: false,
-    toxicMs: 0, toxicTickAcc: 0, stunMs: 0, slowMs: 0, freezeMs: 0, nextFreezeMs: 0,
-    acidCycleMs: 0, acidOn: false, acidDmgAcc: 0, suffocatingMs: 0,
-    plantCooldownMs: 0, waterCooldownMs: 0,
-    image: new Image(), imgWidth: 30, imgHeight: 42, direction: 1,
+x: 120, y: 250, w: 40, h: 60,
+vx: 0, vy: -12,
+onGround: false,
+
+hp: 100,
+maxHpBase: 100,
+maxHpBonus: 0,
+
+o2: 50,
+maxO2Base: 50,
+maxO2Bonus: 0,
+
+seedInv: 0,
+planted: 0,
+score: 0,
+
+invulnMs: 0,
+jumpsMax: 1,
+extraJumpUsed: false,
+
+toxicMs: 0,
+toxicTickAcc: 0,
+
+stunMs: 0,
+slowMs: 0,
+
+freezeMs: 0,
+nextFreezeMs: 0,
+
+acidCycleMs: 0,
+acidOn: false,
+acidDmgAcc: 0,
+
+suffocatingMs: 0,
+plantCooldownMs: 0,
+waterCooldownMs: 0,
+
+image: new Image(),
+imgWidth: 30,
+imgHeight: 42,
+direction: 1,
 };
 
 function getMaxHp(){ return player.maxHpBase + player.maxHpBonus; }
@@ -144,139 +181,191 @@ let dlgOnDone = () => {};
 let typingTimer = null;
 let autoTimer = null;
 
-function resolveAsset(rel){ return new URL(rel, BASE_URL).href; }
+function resolveAsset(rel){
+return new URL(rel, BASE_URL).href;
+}
 
 function setSpeakerUI(name){
-    const s = SPEAKERS[name] || { role:"SYSTEM", color:"#cfe1ff", avatar:"avatars/unknown_avatar.png" };
-    dlgNameEl.textContent = name || "???";
-    dlgRoleEl.textContent = s.role;
-    dlgNameEl.style.color = s.color;
-    dlgAvatar.style.boxShadow = `0 12px 26px rgba(0,0,0,.35), 0 0 30px ${s.color}33`;
-    dlgAvatar.style.borderColor = `${s.color}55`;
-    dlgAvatar.src = resolveAsset(s.avatar || "avatars/unknown_avatar.png");
+const s = SPEAKERS[name] || { role:"SYSTEM", color:"#cfe1ff", avatar:"avatars/unknown_avatar.png" };
+
+dlgNameEl.textContent = name || "???";
+dlgRoleEl.textContent = s.role;
+dlgNameEl.style.color = s.color;
+
+dlgAvatar.style.boxShadow = `0 12px 26px rgba(0,0,0,.35), 0 0 30px ${s.color}33`;
+dlgAvatar.style.borderColor = `${s.color}55`;
+
+// ✅ avatar도 GitHub Pages 안전 경로
+dlgAvatar.src = resolveAsset(s.avatar || "avatars/unknown_avatar.png");
 }
 
 function setAutoBtn(){ dlgAutoBtn.textContent = `AUTO: ${dlgAuto ? "ON" : "OFF"}`; }
 
 function openDialogue(lines, onDone){
-    dlgActive = true;
-    dlgLines = lines || [];
-    dlgIdx = 0;
-    dlgOnDone = onDone || (()=>{});
-    dlgAuto = false;
-    setAutoBtn();
-    open(dialogue);
-    showDialogueLine();
+dlgActive = true;
+dlgLines = lines || [];
+dlgIdx = 0;
+dlgOnDone = onDone || (()=>{});
+dlgAuto = false;
+setAutoBtn();
+open(dialogue);
+showDialogueLine();
 }
 function closeDialogue(){
-    dlgActive = false;
-    dlgTyping = false;
-    clearTimeout(typingTimer);
-    clearTimeout(autoTimer);
-    close(dialogue);
+dlgActive = false;
+dlgTyping = false;
+clearTimeout(typingTimer);
+clearTimeout(autoTimer);
+close(dialogue);
 }
 function typeText(full){
-    dlgTyping = true;
-    dlgTextEl.textContent = "";
-    dlgNextEl.style.opacity = "0";
-    const speed = 18;
-    let i = 0;
-    const step = () => {
-        if (!dlgTyping) return;
-        i++;
-        dlgTextEl.textContent = full.slice(0, i);
-        if (i >= full.length){
-            dlgTyping = false;
-            dlgNextEl.style.opacity = "1";
-            if (dlgAuto){
-                clearTimeout(autoTimer);
-                autoTimer = setTimeout(()=>nextDialogue(), 520);
-            }
-            return;
-        }
-        typingTimer = setTimeout(step, speed);
-    };
-    step();
+dlgTyping = true;
+dlgTextEl.textContent = "";
+dlgNextEl.style.opacity = "0";
+const speed = 18;
+let i = 0;
+
+const step = () => {
+if (!dlgTyping) return;
+i++;
+dlgTextEl.textContent = full.slice(0, i);
+if (i >= full.length){
+dlgTyping = false;
+dlgNextEl.style.opacity = "1";
+if (dlgAuto){
+clearTimeout(autoTimer);
+autoTimer = setTimeout(()=>nextDialogue(), 520);
+}
+return;
+}
+typingTimer = setTimeout(step, speed);
+};
+step();
 }
 
 function showDialogueLine() {
-    const line = dlgLines[dlgIdx];
-    if (!line) {
-        console.log("대화 리스트 끝 - 종료 시퀀스 진입");
-        closeDialogue();
-        if (typeof dlgOnDone === 'function') {
+const line = dlgLines[dlgIdx];
+
+    // 대화 리스트가 완전히 끝났을 때
+if (!line) {
+console.log("대화 리스트 끝 - 종료 시퀀스 진입");
+        closeDialogue(); // 대화창 닫기
+
+        // ✅ 대화가 완전히 끝났을 때 맡겨진 함수만 실행
+        // ✅ 등록된 '완료 콜백' 함수를 여기서 실행합니다.
+if (typeof dlgOnDone === 'function') {
             const finalAction = dlgOnDone;
-            dlgOnDone = null; 
+            dlgOnDone = null; // 중복 호출 방지
             finalAction(); 
-        }
-        return;
-    }
-    setSpeakerUI(line.speaker || line.name);
-    typeText(line.text || "");
+}
+return;
 }
 
-// 배너 출력 함수 (완성형)
+setSpeakerUI(line.speaker || line.name);
+typeText(line.text || "");
+}
+
+// 배너를 실제로 제어하는 독립 함수
 function triggerStageBanner(text) {
-    const banner = document.getElementById('stage-banner');
-    if (!banner) return;
-    banner.innerText = text;
+const banner = document.getElementById('stage-banner');
+    if (!banner) {
+        console.error("ID가 'stage-banner'인 요소를 찾을 수 없습니다.");
+        return;
+    }
+
+banner.innerText = text;
     banner.style.display = 'block'; 
-    banner.style.zIndex = '10001'; 
-    banner.classList.remove('animate-stage');
-    void banner.offsetWidth; 
+    banner.style.zIndex = '10001'; // 다른 UI보다 앞에 오도록 설정
+
+    // 애니메이션 초기화 마법의 코드
+banner.classList.remove('animate-stage');
+    void banner.offsetWidth; // ✅ 애니메이션 리셋
     banner.classList.add('animate-stage');
-    setTimeout(() => {
-        banner.style.display = 'none';
+
+    // 3초 후(애니메이션 종료 시점) 숨김
+setTimeout(() => {
+banner.style.display = 'none';
         banner.classList.remove('animate-stage');
-    }, 3000);
+}, 3000);
+}
+
+// 1. 텍스트 설정 및 표시
+banner.innerText = text;
+banner.style.display = 'block';
+banner.style.opacity = '1'; // CSS에 opacity가 0이면 1로 변경
+
+// 2. 애니메이션 클래스 추가
+banner.classList.remove('animate-stage'); // 혹시 남아있을 클래스 제거
+void banner.offsetWidth; // 브라우저가 애니메이션을 다시 인식하게 만드는 마법의 코드
+banner.classList.add('animate-stage');
+
+// 3. 3초 후 정리 (애니메이션 시간 3s에 맞춤)
+setTimeout(() => {
+banner.style.display = 'none';
+banner.classList.remove('animate-stage');
+}, 3000);
 }
 
 function skipTyping(){
-    if (!dlgTyping) return;
-    dlgTyping = false;
-    clearTimeout(typingTimer);
-    const line = dlgLines[dlgIdx];
-    dlgTextEl.textContent = line?.text || "";
-    dlgNextEl.style.opacity = "1";
-    if (dlgAuto){
-        clearTimeout(autoTimer);
-        autoTimer = setTimeout(()=>nextDialogue(), 420);
-    }
+if (!dlgTyping) return;
+dlgTyping = false;
+clearTimeout(typingTimer);
+const line = dlgLines[dlgIdx];
+dlgTextEl.textContent = line?.text || "";
+dlgNextEl.style.opacity = "1";
+if (dlgAuto){
+clearTimeout(autoTimer);
+autoTimer = setTimeout(()=>nextDialogue(), 420);
+}
 }
 function nextDialogue(){
-    if (!dlgActive) return;
-    if (dlgTyping){ skipTyping(); return; }
-    dlgIdx++;
-    showDialogueLine();
+if (!dlgActive) return;
+if (dlgTyping){ skipTyping(); return; }
+dlgIdx++;
+showDialogueLine();
 }
 dlgAutoBtn.addEventListener("click", ()=>{
-    dlgAuto = !dlgAuto; setAutoBtn();
-    if (dlgAuto && !dlgTyping){
-        clearTimeout(autoTimer);
-        autoTimer = setTimeout(()=>nextDialogue(), 520);
-    }
+dlgAuto = !dlgAuto; setAutoBtn();
+if (dlgAuto && !dlgTyping){
+clearTimeout(autoTimer);
+autoTimer = setTimeout(()=>nextDialogue(), 520);
+}
 });
 dlgSkipBtn.addEventListener("click", ()=>{
-    if (!dlgActive) return;
-    dlgTyping = false;
-    clearTimeout(typingTimer);
-    dlgIdx = dlgLines.length;
-    showDialogueLine();
+if (!dlgActive) return;
+dlgTyping = false;
+clearTimeout(typingTimer);
+dlgIdx = dlgLines.length;
+showDialogueLine();
 });
 dialogue.addEventListener("click", ()=> nextDialogue());
 addEventListener("keydown", (e)=>{
-    if (!dlgActive) return;
-    if (e.code === "Space") nextDialogue();
+if (!dlgActive) return;
+if (e.code === "Space") nextDialogue();
+if (e.code === "ShiftLeft" || e.code === "ShiftRight"){
+dlgAuto = !dlgAuto; setAutoBtn();
+if (dlgAuto && !dlgTyping){
+clearTimeout(autoTimer);
+autoTimer = setTimeout(()=>nextDialogue(), 520);
+}
+}
 });
 
 // ====== loading quotes ======
-const LOADING_QUOTES = ["당신의 선택이 지구의 내일을 바꿉니다.", "작은 녹색이 모여 숲이 됩니다.", "멈추지 마. 여기엔 아직 가능성이 있어."];
+const LOADING_QUOTES = [
+"당신의 선택이 지구의 내일을 바꿉니다.",
+"오염은 빠르고, 회복은 느립니다. 그래서 지금이 중요합니다.",
+"작은 녹색이 모여 숲이 됩니다.",
+"쓰레기는 사라지지 않습니다. 장소만 바뀔 뿐입니다.",
+"멈추지 마. 여기엔 아직 가능성이 있어.",
+];
 async function showLoadingLine(){
-    open(loading);
-    loadingText.textContent = LOADING_QUOTES[Math.floor(Math.random()*LOADING_QUOTES.length)];
-    await new Promise(r=>setTimeout(r, 900));
-    close(loading);
+open(loading);
+loadingText.textContent = LOADING_QUOTES[Math.floor(Math.random()*LOADING_QUOTES.length)];
+await new Promise(r=>setTimeout(r, 900));
+close(loading);
 }
+
 // ====== cards ======
 const RARITY = {
 common:    { name:"일반",      w:0.60, cls:"r-common" },
@@ -331,8 +420,8 @@ const suffix = def.oneTime ? (st?.usesLeft ? " (1회)" : " (소모)") : "";
 const item = document.createElement("div");
 item.className = "ownedCard";
 item.innerHTML = `<span class="emo">${def.emoji}</span>
-     <span><b>${def.name}</b>${suffix}<br/>
-     <span style="color:#9bb0d0;font-size:12px">${def.desc}</span></span>`;
+    <span><b>${def.name}</b>${suffix}<br/>
+    <span style="color:#9bb0d0;font-size:12px">${def.desc}</span></span>`;
 ownedCardsEl.appendChild(item);
 }
 }
@@ -449,10 +538,10 @@ cardOptions.forEach((c, idx)=>{
 const div = document.createElement("div");
 div.className = `card ${RARITY[c.rarity].cls}`;
 div.innerHTML = `
-     <div class="rarity">${RARITY[c.rarity].name} 카드</div>
-     <div class="name">${c.name}</div>
-     <div class="emoji">${c.emoji}</div>
-     <div class="desc">${c.desc}</div>`;
+    <div class="rarity">${RARITY[c.rarity].name} 카드</div>
+    <div class="name">${c.name}</div>
+    <div class="emoji">${c.emoji}</div>
+    <div class="desc">${c.desc}</div>`;
 div.addEventListener("click", ()=>chooseCard(idx));
 cardRow.appendChild(div);
 });
@@ -1262,28 +1351,30 @@ if (!running) startLoop();
 });
 }
 
-// ====== BOOT (맨 마지막 중괄호 짝 맞춤) ======
+// ====== BOOT (async 필수) ======
 (async function boot(){
-    close(overlay);
-    close(loading);
-    close(dialogue);
+close(overlay);
+close(loading);
+close(dialogue);
 
-    await preloadStageBackgrounds();
+// ✅ 배경 먼저 전부 프리로드 (이게 배경 PNG 문제를 끝내는 핵심)
+await preloadStageBackgrounds();
 
-    player.image.src = resolveAsset("robot.png");
-    player.image.onload = () => {
-        player.imgWidth = player.image.width;
-        player.imgHeight = player.image.height;
-    };
+// ✅ 플레이어 이미지도 안전 경로
+player.image.src = resolveAsset("robot.png");
+player.image.onload = () => {
+player.imgWidth = player.image.width;
+player.imgHeight = player.image.height;
+};
 
-    openDialogue(
-        [
-            { name:"??", text:"…신호 수신. 복구 시스템 온라인." },
-            { name:"??", text:"유닛을 깨운다." },
-        ],
-        async () => { await runIntroAndStart(); }
-    );
+openDialogue(
+[
+{ name:"??", text:"…신호 수신. 복구 시스템 온라인." },
+{ name:"??", text:"유닛을 깨운다." },
+],
+async () => { await runIntroAndStart(); }
+);
 
-    render();
-    renderOwnedCards();
-})(); // <-- boot 함수 닫기
+render();
+renderOwnedCards();
+})();
