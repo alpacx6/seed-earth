@@ -8,8 +8,71 @@
 </head>
 
 <body>
-  <div class="app">
 
+body {
+            background-color: #333; /* 게임 배경 예시 */
+            margin: 0;
+            overflow: hidden; /* 스크롤 방지 */
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+        }
+
+        /* 스테이지 배너 스타일 */
+        .stage-banner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* 정중앙 배치 */
+            
+            background: rgba(0, 0, 0, 0.85); /* 반투명 검은 배경 */
+            color: #fff;
+            padding: 20px 60px;
+            border: 2px solid #ffd700; /* 금색 테두리 (게임 느낌) */
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); /* 광원 효과 */
+            
+            font-size: 2rem;
+            font-weight: bold;
+            white-space: nowrap; /* 줄바꿈 방지 */
+            z-index: 9999; /* 다른 요소보다 위에 뜨게 */
+            
+            /* 애니메이션 적용 */
+            animation: slideLeftVanish 3s ease-in-out forwards;
+            
+            /* 클릭 방지 (배너가 떠 있어도 게임 조작 가능하게) */
+            pointer-events: none;
+        }
+
+        /* 애니메이션 키프레임 정의 */
+        @keyframes slideLeftVanish {
+            /* 0% ~ 10%: 부드럽게 등장 */
+            0% {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0;
+            }
+            10% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+            
+            /* 10% ~ 70%: 중앙에서 대기 (읽을 시간) */
+            70% {
+                transform: translate(-50%, -50%);
+                opacity: 1;
+            }
+            
+            /* 70% ~ 100%: 왼쪽으로 슥- 이동하며 사라짐 */
+            100% {
+                transform: translate(-150vw, -50%) skewX(-20deg); /* 화면 왼쪽 바깥으로 이동 */
+                opacity: 0;
+            }
+        }
+  
+  <div class="app">
+    
     <!-- TOP BAR -->
     <header class="topbar">
       <div class="brand">
