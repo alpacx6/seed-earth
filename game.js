@@ -1,29 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const startBtn = document.getElementById('start-btn');
-    const mainMenu = document.getElementById('main-menu');
-    const gameContainer = document.getElementById('game-container');
-    const stageBanner = document.getElementById('stage-banner');
 
-    if (startBtn) {
-        startBtn.addEventListener('click', () => {
-            // 1. 메인 메뉴 숨기기
-            mainMenu.style.display = 'none';
-
-            // 2. 게임 화면(.app) 나타내기
-            // 기존 CSS에서 .app이 flex로 잡혀있다면 'flex'라고 써주세요.
-            gameContainer.style.display = 'flex'; 
-
-            // 3. 스테이지 배너 보여주고 애니메이션 시작
-            stageBanner.style.display = 'block';
-            stageBanner.classList.add('animate-stage');
-
-            // 4. 애니메이션 종료 후 배너 숨기기
-            setTimeout(() => {
-                stageBanner.style.display = 'none';
-            }, 3000);
-        });
-    }
-});
 
 // game.js (type="module")
 import { baseStages7, rand } from "./stages.js";
@@ -68,6 +43,34 @@ const uiPlanted = document.getElementById("planted");
 const uiTotal = document.getElementById("total");
 const uiScore = document.getElementById("score");
 const uiHint = document.getElementById("hint");
+
+document.addEventListener('DOMContentLoaded', () => {
+    const startBtn = document.getElementById('start-btn');
+    const mainMenu = document.getElementById('main-menu');
+    const gameContainer = document.getElementById('game-container');
+    const stageBanner = document.getElementById('stage-banner');
+
+    if (startBtn) {
+        startBtn.addEventListener('click', () => {
+            // 1. 메인 메뉴 숨기기
+            mainMenu.style.display = 'none';
+
+            // 2. 게임 화면(.app) 나타내기
+            // 기존 CSS에서 .app이 flex로 잡혀있다면 'flex'라고 써주세요.
+            gameContainer.style.display = 'flex'; 
+
+            // 3. 스테이지 배너 보여주고 애니메이션 시작
+            stageBanner.style.display = 'block';
+            stageBanner.classList.add('animate-stage');
+
+            // 4. 애니메이션 종료 후 배너 숨기기
+            setTimeout(() => {
+                stageBanner.style.display = 'none';
+            }, 3000);
+        });
+    }
+});
+
 
 // ====== utils ======
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
