@@ -246,18 +246,18 @@ step();
 function showDialogueLine() {
     const line = dlgLines[dlgIdx];
 
-    // 1. 대화 리스트가 완전히 끝났을 때
     if (!line) {
+        console.log("대화 리스트 끝 - 종료 시퀀스 진입");
         closeDialogue(); // 대화창 닫기
-        
-        // ✅ 여기서 직접 배너를 부르지 말고, 
-        // 처음에 '대화가 끝나면 이거 해라'라고 맡겨둔 함수(콜백)를 실행합니다.
+
+        // ✅ 대화가 완전히 끝났을 때 맡겨진 함수만 실행
         if (typeof dlgOnDone === 'function') {
-            dlgOnDone(); 
+            const tempCallback = dlgOnDone;
+            dlgOnDone = null; // 중복 방지
+            tempCallback();
         }
         return;
     }
-
     setSpeakerUI(line.speaker || line.name);
     typeText(line.text || "");
 }
@@ -268,18 +268,16 @@ function triggerStageBanner(text) {
     if (!banner) return;
 
     banner.innerText = text;
-    banner.style.display = 'block';
-    
-    // 애니메이션 초기화 (이전에 실행된 애니메이션을 지우고 다시 시작)
+    banner.style.display = 'block'; // ✅ 강제 표시
+    banner.style.opacity = '1';
+    banner.style.zIndex = '10001'; // ✅ 대화창보다 위
+
     banner.classList.remove('animate-stage');
-    void banner.offsetWidth; // 브라우저가 위치를 재계산하게 하여 애니메이션을 리셋함
+    void banner.offsetWidth; // ✅ 애니메이션 리셋
     banner.classList.add('animate-stage');
 
-    // 3초 후 정리
     setTimeout(() => {
         banner.style.display = 'none';
-        banner.style.zIndex = "10001"; // 💡 대화창(보통 10000)보다 높게 설정
-        banner.classList.remove('animate-stage');
     }, 3000);
 }
 
