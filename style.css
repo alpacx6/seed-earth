@@ -157,22 +157,21 @@ box-shadow: 0 10px 20px rgba(0,0,0,.18) inset;
     flex: 1 1 auto;
     min-height: 0;
     display: grid;
-    /* 왼쪽은 남는 공간을 다 쓰고, 오른쪽은 340px을 유지하되 화면이 작아지면 줄어들 수 있게 함 */
-    grid-template-columns: 1fr 340px; 
+    /* 고정 크기가 아니라 비율로 설정하여 유연하게 대처 */
+    grid-template-columns: minmax(0, 1fr) 340px; 
     gap: 16px;
-    align-items: center; /* 수직 중앙 정렬로 비율 깨짐 방지 */
-    overflow: hidden; /* 영역 밖으로 나가는 것 방지 */
+    align-items: center; 
+    overflow: hidden;
 }
 
 /* LEFT GAME AREA */
 .gameShell {
     position: relative;
     width: 100%;
-    /* 중요: 높이가 너무 커져서 상단바나 아래를 침범하지 않게 조절 */
     height: 100%; 
-    max-height: calc(100vh - 120px); /* 상단바와 여백을 고려한 높이 제한 */
-    
-    aspect-ratio: 16 / 9; /* 고정 비율 */
+    /* 핵심: 16:9 비율을 유지하되 가로 너비가 부모(grid)를 절대 넘지 못하게 제한 */
+    max-width: calc((100vh - 140px) * 1.77); 
+    aspect-ratio: 16 / 9;
     margin: 0 auto;
     
     border-radius: 22px;
@@ -180,12 +179,10 @@ box-shadow: 0 10px 20px rgba(0,0,0,.18) inset;
     border: 1px solid rgba(255,255,255,.08);
     box-shadow: var(--shadow);
     
-    /* 캔버스가 이 영역을 넘지 않도록 설정 */
     display: flex;
     justify-content: center;
     align-items: center;
 }
-
 /* ✅ 캔버스를 영역에 "딱" 맞추되, JS 내부 해상도는 유지 */
 #gameCanvas {
     /* 16:9 비율 안에서 최대 크기로 맞춤 */
@@ -200,12 +197,13 @@ box-shadow: 0 10px 20px rgba(0,0,0,.18) inset;
 /* ================= RIGHT PANELS ================= */
 /* RIGHT PANELS (오른쪽 영역이 안 가려지게 보장) */
 .right {
-    min-width: 340px; /* 너무 좁아지지 않게 고정 */
+    width: 340px; /* min-width 대신 고정 width 사용 추천 */
+    flex-shrink: 0; /* grid 안에서 줄어들지 않도록 고정 */
     height: 100%;
     display: flex;
     flex-direction: column;
     gap: 14px;
-    justify-content: center; /* 게임 화면과 높이를 맞춤 */
+    justify-content: center;
 }
 
 .panel{
