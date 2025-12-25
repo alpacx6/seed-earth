@@ -291,7 +291,6 @@ banner.style.display = 'none';
 
 // 1. 텍스트 설정 및 표시
 const banner = document.getElementById('stage-banner');
-banner.innerText = text;
 banner.style.display = 'block';
 banner.style.opacity = '1'; // CSS에 opacity가 0이면 1로 변경
 
