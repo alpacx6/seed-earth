@@ -47,13 +47,12 @@ function open(el){ el.classList.add("is-open"); }
 function close(el){ el.classList.remove("is-open"); }
 function setHint(msg){ uiHint.textContent = msg || ""; }
 
-// ====== stage rule box ======
-function setStageRuleBox(stage){
-  if (!stage?.ruleText) { stageRuleOverlay.classList.remove("is-on"); return; }
-  stageRuleOverlay.innerHTML = `<span class="tag">RULE</span>${stage.ruleText}`;
-  stageRuleOverlay.classList.add("is-on");
+function setStageRuleBox(text) {
+  const el = document.getElementById("stageRuleOverlay");
+  if (el) {
+    el.innerHTML = text || "추가 규칙 없음";
+  }
 }
-
 // ====== loop control ======
 let running = false;
 let lastT = 0;
@@ -1266,63 +1265,49 @@ function render(){
   ctx.restore();
 }
 
-// ====== start ======
-async function runIntroAndStart(){
+// ✅ 여기서부터 끝까지 붙여넣기
+
+// 1. 게임 시작 및 초기화 함수
+async function runIntroAndStart() {
   resetAllGameState();
-  openDialogue(INTRO_DIALOGUE, async () => {
-    await showLoadingLine();
-    await beginStage(0, true);
-    setHint("←/→ 이동, Space 점프, E 심기, F 물주기, Q 재시작, R 카드발동, Shift AUTO");
-    renderOwnedCards();
-    if (!running) startLoop();
-  });
-}
-
- // ====== 최종 실행부 ======
-
-// 1. 화면 전환 및 초기화 함수
-async function startGame() {
-  // UI 요소가 있는지 확인 후 처리
-  const mainMenu = document.getElementById('main-menu');
-  const gameContainer = document.getElementById('game-container');
-
-  if (mainMenu) mainMenu.style.display = 'none';
-  if (gameContainer) gameContainer.style.display = 'block';
-
-  // 로딩/대화창 초기화
-  if (typeof close === 'function') {
-    close(overlay);
-    close(loading);
-    close(dialogue);
-  }
-
-  // 배경 및 플레이어 이미지 로드
-  await preloadStageBackgrounds();
-  player.image.src = resolveAsset("robot.png");
-
-  // 게임 시작 (ROBOT 아바타 데이터가 있는 INTRO_DIALOGUE 실행)
-  // dialogue.js에 있는 데이터를 그대로 쓰거나 아래처럼 직접 넣습니다.
+  
+  // 첫 대사 시작
   openDialogue(
     [
       { speaker: "SYSTEM", text: "...신호 수신. 복구 시스템 온라인." },
       { speaker: "ROBOT", text: "유닛 G-01 가동. 분석을 시작합니다." }
     ],
-    async () => { 
-      await runIntroAndStart(); 
+    async () => {
+      await showLoadingLine();
+      await beginStage(0, true);
+      setHint("←/→ 이동, Space 점프, E 심기, F 물주기, Q 재시작, R 카드발동, Shift AUTO");
+      renderOwnedCards();
+      if (!running) startLoop();
     }
   );
-
-  if (typeof render === 'function') render();
 }
 
-// 2. 버튼 클릭 이벤트 연결
+// 2. 버튼 클릭 이벤트 (메인 메뉴 -> 게임 화면 전환)
 document.addEventListener('DOMContentLoaded', () => {
   const startBtn = document.getElementById('start-btn');
   if (startBtn) {
-    // 기존에 걸려있을지 모르는 이벤트를 초기화하고 새로 할당
-    startBtn.onclick = null; 
-    startBtn.onclick = startGame;
-  } else {
-    console.error("시작 버튼(#start-btn)을 찾을 수 없습니다.");
+    startBtn.onclick = async () => {
+      // 화면 전환
+      const mainMenu = document.getElementById('main-menu');
+      const gameContainer = document.getElementById('game-container');
+      if (mainMenu) mainMenu.style.display = 'none';
+      if (gameContainer) gameContainer.style.display = 'block';
+
+      // 초기 UI 숨기기
+      close(overlay);
+      close(loading);
+      close(dialogue);
+
+      // 데이터 로드 후 시작
+      await preloadStageBackgrounds();
+      player.image.src = resolveAsset("robot.png");
+      
+      await runIntroAndStart();
+    };
   }
 });
