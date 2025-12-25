@@ -1,17 +1,3 @@
-console.log("game.js 파일이 정상적으로 로드되었습니다!");
-
-document.addEventListener('DOMContentLoaded', () => {
-    const startBtn = document.getElementById('start-btn');
-    if (startBtn) {
-        console.log("스타트 버튼을 찾았습니다. 클릭 리스너를 등록합니다.");
-        startBtn.onclick = () => {
-            console.log("버튼이 클릭되었습니다!");
-            // 기존 시작 로직...
-        };
-    } else {
-        console.error("HTML에서 'start-btn' ID를 가진 버튼을 찾을 수 없습니다.");
-    }
-});
 
 // game.js (type="module")
 import { baseStages7, rand } from "./stages.js";
