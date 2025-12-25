@@ -243,39 +243,54 @@ typingTimer = setTimeout(step, speed);
 };
 step();
 }
-function showDialogueLine(){
-    const line = dlgLines[dlgIdx];
-    
-    // 대화 리스트가 더 이상 없을 때 (종료 시점)
-    if (!line){
-        closeDialogue(); // 대화창 닫기
-        
-        // 배너를 띄우는 로직 추가
-        setTimeout(() => {
-            showStageBanner("STAGE 1 - 시작의 숲");
-        }, 500); // 대화창이 닫히고 0.5초 뒤에 배너 등장
 
-        dlgOnDone(); // 기존에 설정된 종료 후 콜백 실행
+function showDialogueLine() {
+    const line = dlgLines[dlgIdx];
+
+    // 대화가 더 이상 없을 때 (종료 시점)
+    if (!line) {
+        console.log("대화 종료 - 배너 시퀀스 시작");
+        closeDialogue(); // 대화창 닫기 (기존 함수)
+        
+        // 0.5초 대기 후 배너 실행 (대화창이 사라지는 시간을 고려)
+        setTimeout(() => {
+            triggerStageBanner("STAGE 1 - 시작의 숲");
+        }, 500);
+
+        if (typeof dlgOnDone === 'function') {
+            dlgOnDone();
+        }
         return;
     }
-    
+
     setSpeakerUI(line.name);
     typeText(line.text || "");
-function showStageBanner(text) {
-    const banner = document.getElementById('stage-banner');
-    if (!banner) return;
+}
 
+// 배너를 실제로 제어하는 독립 함수
+function triggerStageBanner(text) {
+    const banner = document.getElementById('stage-banner');
+    if (!banner) {
+        console.error("ID가 'stage-banner'인 요소를 찾을 수 없습니다.");
+        return;
+    }
+
+    // 1. 텍스트 설정 및 표시
     banner.innerText = text;
     banner.style.display = 'block';
+    banner.style.opacity = '1'; // CSS에 opacity가 0이면 1로 변경
+
+    // 2. 애니메이션 클래스 추가
+    banner.classList.remove('animate-stage'); // 혹시 남아있을 클래스 제거
+    void banner.offsetWidth; // 브라우저가 애니메이션을 다시 인식하게 만드는 마법의 코드
     banner.classList.add('animate-stage');
 
-    // 3초 후 배너 숨기기 및 클래스 초기화
+    // 3. 3초 후 정리 (애니메이션 시간 3s에 맞춤)
     setTimeout(() => {
         banner.style.display = 'none';
         banner.classList.remove('animate-stage');
     }, 3000);
 }
-
     
 function skipTyping(){
 if (!dlgTyping) return;
