@@ -12,11 +12,11 @@ startBtn.addEventListener('click', () => {
     mainMenu.style.display = 'none';
     gameContainer.style.display = 'flex';
 
-    // openDialogue(대화내용, 모든대화가_끝나면_실행할_함수)
+    // 첫 번째 대화 시작
     openDialogue(INTRO_DIALOGUE, () => {
-        console.log("인트로 대화 종료! 이제 배너를 한 번만 띄웁니다.");
+        // 인트로 대화가 완전히 끝난 직후 실행됨
+        console.log("인트로 완료 -> 배너 출력");
         
-        // 대화창이 완전히 사라지는 느낌을 주기 위해 0.5초 정도 여유를 둡니다.
         setTimeout(() => {
             triggerStageBanner("STAGE 1 - 시작의 숲");
         }, 500);
