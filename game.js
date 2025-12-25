@@ -58,6 +58,30 @@ stageRuleOverlay.innerHTML = `<span class="tag">RULE</span>${stage.ruleText}`;
 stageRuleOverlay.classList.add("is-on");
 }
 
+function showStageTitle(text) {
+    // 1. 기존 배너가 있다면 제거 (중복 방지)
+    const oldBanner = document.querySelector('.stage-banner');
+    if (oldBanner) {
+        oldBanner.remove();
+    }
+
+    // 2. 새로운 배너 생성
+    const banner = document.createElement('div');
+    banner.classList.add('stage-banner');
+    banner.innerText = text;
+    
+    // 3. body에 추가
+    document.body.appendChild(banner);
+
+    // 4. 애니메이션이 끝나면(3초 후) DOM에서 완전히 제거 (메모리 관리)
+    setTimeout(() => {
+        banner.remove();
+    }, 3000); 
+}
+
+// 사용 예시: 게임 시작 시 또는 스테이지 변경 시 호출
+showStageTitle("STAGE 2 - 어둠의 동굴");
+
 // ====== loop control ======
 let running = false;
 let lastT = 0;
