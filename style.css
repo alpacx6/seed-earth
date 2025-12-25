@@ -217,6 +217,12 @@ font-weight: 950;
 color: #cfe1ff;
 margin-bottom: 10px;
 }
+.panel:last-child {
+    height: 120px; /* 4. 힌트창 높이를 고정해서 카드를 밀어내지 못하게 함 */
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+}
 .ownedCards{
 display:flex;
 flex-direction:column;
