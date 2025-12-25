@@ -278,6 +278,7 @@ function triggerStageBanner(text) {
     // 3초 후 정리
     setTimeout(() => {
         banner.style.display = 'none';
+        banner.style.zIndex = "10001"; // 💡 대화창(보통 10000)보다 높게 설정
         banner.classList.remove('animate-stage');
     }, 3000);
 }
