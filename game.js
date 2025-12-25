@@ -44,37 +44,39 @@ const uiTotal = document.getElementById("total");
 const uiScore = document.getElementById("score");
 const uiHint = document.getElementById("hint");
 
-document.addEventListener('DOMContentLoaded', () => {
-    const startBtn = document.getElementById('start-btn');
-    const mainMenu = document.getElementById('main-menu');
-    const gameScreen = document.getElementById('game-screen');
-
-    // 시작 버튼 클릭 이벤트
-    if (startBtn) {
+if (startBtn) {
         startBtn.addEventListener('click', () => {
-            console.log("버튼 클릭됨!"); // 작동 확인용
-            
-            // 화면 전환
+            // 1. 화면 전환
             mainMenu.style.display = 'none';
             gameScreen.style.display = 'flex';
-            
-            // 스테이지 알림 실행
+
+            // 2. 스테이지 배너 표시 (함수 호출)
             showStageTitle("STAGE 1 - 시작의 숲");
         });
     }
 });
 
+/**
+ * 스테이지 이름을 화면에 띄우고 애니메이션을 실행하는 함수
+ */
 function showStageTitle(text) {
+    // 새로운 div 생성
     const banner = document.createElement('div');
+    
+    // 클래스 추가 (디자인용 + 애니메이션용)
     banner.className = 'stage-banner animate-stage';
+    
+    // 텍스트 넣기
     banner.innerText = text;
+    
+    // 화면(body)에 추가
     document.body.appendChild(banner);
 
+    // 3초 후 애니메이션이 끝나면 DOM에서 제거 (최적화)
     setTimeout(() => {
         banner.remove();
     }, 3000);
 }
-
 
 // ====== utils ======
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
