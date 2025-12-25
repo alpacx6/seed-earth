@@ -62,6 +62,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+startBtn.addEventListener('click', () => {
+    // 화면 전환 로직 (메뉴 숨기기 등)
+    mainMenu.style.display = 'none';
+    gameContainer.style.display = 'flex';
+
+    // ✅ 핵심: openDialogue의 두 번째 인자로 콜백(익명 함수)을 전달합니다.
+    openDialogue(INTRO_DIALOGUE, () => {
+        // 이 구역은 인트로 대화(4줄)가 완전히 끝난 뒤에만 실행됩니다.
+        console.log("인트로 완료! 스테이지 배너를 호출합니다.");
+        
+        setTimeout(() => {
+            triggerStageBanner("STAGE 1 - 시작의 숲");
+        }, 500);
+    });
 
 // ====== utils ======
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
