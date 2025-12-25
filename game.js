@@ -42,6 +42,26 @@ const uiTotal = document.getElementById("total");
 const uiScore = document.getElementById("score");
 const uiHint = document.getElementById("hint");
 
+document.addEventListener('DOMContentLoaded', () => {
+    const startBtn = document.getElementById('start-btn');
+    const mainMenu = document.getElementById('main-menu');
+    const gameContainer = document.getElementById('game-container'); // .app 부분
+    const stageBanner = document.getElementById('stage-banner');
+
+    if (startBtn) {
+        startBtn.addEventListener('click', () => {
+            // 1. 메인 메뉴 숨기기
+            mainMenu.style.display = 'none';
+
+            // 2. 게임 화면 보이기
+            gameContainer.style.display = 'block'; 
+
+            // 5. 게임 엔진 시작 함수가 있다면 여기서 호출
+            // if (typeof initGame === 'function') initGame();
+        });
+    }
+});
+
 // ====== utils ======
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 function overlap(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
