@@ -1,19 +1,10 @@
 window.addEventListener('resize', () => {
     const canvas = document.getElementById('gameCanvas');
-    // 캔버스의 내부 좌표계 해상도를 고정 (게임 로직이 깨지지 않게)
-    canvas.width = 960;
-    canvas.height = 540;
-    
-    // 비율이 유지되고 있는지 콘솔로 확인 (개발용)
-    // console.log("Current Ratio:", canvas.clientWidth / canvas.clientHeight);
-});
-
 
 // game.js (type="module")
 import { baseStages7, rand } from "./stages.js";
 import { SPEAKERS, INTRO_DIALOGUE, END_DIALOGUE, stageEnterDialogue } from "./dialogue.js";
 
-console.log("game.js LOADED (FINAL)");
 
 const BASE_URL = new URL("./", import.meta.url); // ✅ 모든 경로를 여기 기준으로 안전하게
 
@@ -1058,8 +1049,8 @@ function update(dt){
     stopLoop();
     openDialogue(
       [
-        { name:"??", text:"신호 불안정. 유닛을 재기동한다." },
-        { name:"로봇", text:"…재시도." },
+        { name:"SYSTEM", text:"괜찮아! 다시 해볼까?" },
+        { name:"ROBOT", text:"…재시도." },
       ],
       () => restartStageNoCard()
     );
@@ -1095,15 +1086,15 @@ function update(dt){
     if (currentStageIndex < STAGES.length - 1){
       openDialogue(
         [
-          { name:"??", text:`${STAGES[currentStageIndex].name} 정화 완료.` },
-          { name:"로봇", text:"다음 구역으로 이동한다." },
+          { name:"SYSTEM", text:`${STAGES[currentStageIndex].name} 정화 완료.` },
+          { name:"ROBOT", text:"다음 구역으로 이동한다." },
         ],
         async () => { await goNextStage(); }
       );
     } else {
       openDialogue(END_DIALOGUE, async () => {
         openDialogue(
-          [{ name:"로봇", text:`임무 기록 종료. Score: ${player.score}  (재시작하려면 Space)` }],
+          [{ name:"ROBOT", text:`...임무 완료. Score: ${player.score}  (재시작하려면 Space)` }],
           async () => { resetAllGameState(); await runIntroAndStart(); }
         );
       });
@@ -1325,8 +1316,8 @@ async function runIntroAndStart(){
 
   openDialogue(
     [
-      { name:"??", text:"…신호 수신. 복구 시스템 온라인." },
-      { name:"??", text:"유닛을 깨운다." },
+      { name:"SYSTEM", text:"...신호 수신. 복구 시스템 온라인." },
+      { name:"SYSTEM", text:"...유닛을 깨운다." },
     ],
     async () => { await runIntroAndStart(); }
   );
