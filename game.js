@@ -1,4 +1,29 @@
-alert("game.js 실행됨");
+document.addEventListener('DOMContentLoaded', () => {
+    const startBtn = document.getElementById('start-btn');
+    const mainMenu = document.getElementById('main-menu');
+    const gameContainer = document.getElementById('game-container');
+    const stageBanner = document.getElementById('stage-banner');
+
+    if (startBtn) {
+        startBtn.addEventListener('click', () => {
+            // 1. 메인 메뉴 숨기기
+            mainMenu.style.display = 'none';
+
+            // 2. 게임 화면(.app) 나타내기
+            // 기존 CSS에서 .app이 flex로 잡혀있다면 'flex'라고 써주세요.
+            gameContainer.style.display = 'flex'; 
+
+            // 3. 스테이지 배너 보여주고 애니메이션 시작
+            stageBanner.style.display = 'block';
+            stageBanner.classList.add('animate-stage');
+
+            // 4. 애니메이션 종료 후 배너 숨기기
+            setTimeout(() => {
+                stageBanner.style.display = 'none';
+            }, 3000);
+        });
+    }
+});
 
 // game.js (type="module")
 import { baseStages7, rand } from "./stages.js";
@@ -43,40 +68,6 @@ const uiPlanted = document.getElementById("planted");
 const uiTotal = document.getElementById("total");
 const uiScore = document.getElementById("score");
 const uiHint = document.getElementById("hint");
-
-if (startBtn) {
-        startBtn.addEventListener('click', () => {
-            // 1. 화면 전환
-            mainMenu.style.display = 'none';
-            gameScreen.style.display = 'flex';
-
-            // 2. 스테이지 배너 표시 (함수 호출)
-            showStageTitle("STAGE 1 - 시작의 숲");
-        });
-    }
-});
-
-/**
- * 스테이지 이름을 화면에 띄우고 애니메이션을 실행하는 함수
- */
-function showStageTitle(text) {
-    // 새로운 div 생성
-    const banner = document.createElement('div');
-    
-    // 클래스 추가 (디자인용 + 애니메이션용)
-    banner.className = 'stage-banner animate-stage';
-    
-    // 텍스트 넣기
-    banner.innerText = text;
-    
-    // 화면(body)에 추가
-    document.body.appendChild(banner);
-
-    // 3초 후 애니메이션이 끝나면 DOM에서 제거 (최적화)
-    setTimeout(() => {
-        banner.remove();
-    }, 3000);
-}
 
 // ====== utils ======
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
