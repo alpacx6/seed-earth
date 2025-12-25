@@ -9,46 +9,39 @@
 
 <body>
 
-  <div id="main-menu" class="screen">
-        <h1>SUPER WEB GAME</h1>
-        <button id="start-btn" class="start-btn">GAME START</button>
-    </div>
-
-    <div id="game-screen" class="screen" style="display: none;">
-        <div class="game-ui">
-            <p>게임이 시작되었습니다!</p>
-            <span>플레이어 조작 등을 여기에 구현하세요.</span>
-        </div>
-    </div>
   
-  <div class="stage-banner">
-        STAGE 1 - 시작의 숲
-    </div>
-
   <div class="app">
     
-    <!-- TOP BAR -->
+  <div id="main-menu" class="screen">
+    <h1>Plant Back Earth</h1>
+    <button id="start-btn" class="start-btn">GAME START</button>
+</div>
+
+<div id="stage-banner" class="stage-banner" style="display: none;">
+    STAGE 1 - 시작의 숲
+</div>
+
+<div id="game-container" class="app" style="display: none;">
     <header class="topbar">
-      <div class="brand">
-        <div class="brandIcon">
-          <span class="bot">🤖</span>
-          <span class="leaf">🌱</span>
+        <div class="brand">
+            <div class="brandIcon">
+                <span class="bot">🤖</span>
+                <span class="leaf">🌱</span>
+            </div>
+            <div class="brandText">
+                <div class="brandName">Plant Back Earth</div>
+                <div class="brandSub">2D 파쿠르 · 지구 재생 프로젝트</div>
+            </div>
         </div>
-        <div class="brandText">
-          <div class="brandName">Plant Back Earth</div>
-          <div class="brandSub">2D 파쿠르 · 지구 재생 프로젝트</div>
+        
+        <div class="hud">
+            <div class="pill"><span class="k">Stage</span><b class="v" id="stage">1</b></div>
+            <div class="pill"><span class="k">HP</span><b class="v"><span id="hp">100</span>/<span id="maxHp">100</span></b></div>
+            <div class="pill"><span class="k">O₂</span><b class="v"><span id="o2">50</span>/<span id="maxO2">50</span></b></div>
+            <div class="pill"><span class="k">Seeds</span><b class="v" id="seedInv">0</b></div>
+            <div class="pill"><span class="k">Planted</span><b class="v"><span id="planted">0</span>/<span id="total">0</span></b></div>
+            <div class="pill"><span class="k">Score</span><b class="v" id="score">0</b></div>
         </div>
-</div>
-      
-      <!-- HUD pills (id는 game.js 호환) -->
-      <div class="hud">
-        <div class="pill"><span class="k">Stage</span><b class="v" id="stage">1</b></div>
-        <div class="pill"><span class="k">HP</span><b class="v"><span id="hp">100</span>/<span id="maxHp">100</span></b></div>
-        <div class="pill"><span class="k">O₂</span><b class="v"><span id="o2">50</span>/<span id="maxO2">50</span></b></div>
-        <div class="pill"><span class="k">Seeds</span><b class="v" id="seedInv">0</b></div>
-        <div class="pill"><span class="k">Planted</span><b class="v"><span id="planted">0</span>/<span id="total">0</span></b></div>
-        <div class="pill"><span class="k">Score</span><b class="v" id="score">0</b></div>
-</div>
     </header>
     
     <!-- MAIN -->
@@ -99,7 +92,7 @@
                 <div class="dlgHelp">Shift: AUTO 토글</div>
               </div>
             </div>
-</div>
+            </div>
         
           <div id="dlgNext" class="dlgNext">▶</div>
       </div>
