@@ -246,27 +246,41 @@ step();
 function showDialogueLine() {
     const line = dlgLines[dlgIdx];
 
-    // 대화가 더 이상 없을 때 (종료 시점)
+    // 1. 대화 리스트가 완전히 끝났을 때
     if (!line) {
-        closeDialogue(); // 대화창 닫기 (기존 함수)
-
+        closeDialogue(); // 대화창 닫기
+        
+        // ✅ 여기서 직접 배너를 부르지 말고, 
+        // 처음에 '대화가 끝나면 이거 해라'라고 맡겨둔 함수(콜백)를 실행합니다.
         if (typeof dlgOnDone === 'function') {
-            dlgOnDone();
+            dlgOnDone(); 
+        }
         return;
     }
 
-    setSpeakerUI(line.speaker); // dialogue.js 구조에 맞춰 line.name 대신 line.speaker 사용 가능
-      typeText(line.text || "");
-}
+    setSpeakerUI(line.speaker || line.name);
+    typeText(line.text || "");
 }
 
 // 배너를 실제로 제어하는 독립 함수
 function triggerStageBanner(text) {
     const banner = document.getElementById('stage-banner');
-    if (!banner) {
-        console.error("ID가 'stage-banner'인 요소를 찾을 수 없습니다.");
-        return;
-    }
+    if (!banner) return;
+
+    banner.innerText = text;
+    banner.style.display = 'block';
+    
+    // 애니메이션 초기화 (이전에 실행된 애니메이션을 지우고 다시 시작)
+    banner.classList.remove('animate-stage');
+    void banner.offsetWidth; // 브라우저가 위치를 재계산하게 하여 애니메이션을 리셋함
+    banner.classList.add('animate-stage');
+
+    // 3초 후 정리
+    setTimeout(() => {
+        banner.style.display = 'none';
+        banner.classList.remove('animate-stage');
+    }, 3000);
+}
 
     // 1. 텍스트 설정 및 표시
     banner.innerText = text;
