@@ -248,13 +248,7 @@ function showDialogueLine() {
 
     // 대화가 더 이상 없을 때 (종료 시점)
     if (!line) {
-        console.log("대화 종료 - 배너 시퀀스 시작");
         closeDialogue(); // 대화창 닫기 (기존 함수)
-        
-        // 0.5초 대기 후 배너 실행 (대화창이 사라지는 시간을 고려)
-        setTimeout(() => {
-            triggerStageBanner("STAGE 1 - 시작의 숲");
-        }, 500);
 
         if (typeof dlgOnDone === 'function') {
             dlgOnDone();
