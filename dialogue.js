@@ -6,24 +6,6 @@ export const SPEAKERS = {
   R2:     { name: "연구원2", role: "LAB-02", avatar: "./avatars/researcher2.png" },
 };
 
-import { INTRO_DIALOGUE } from './dialogue.js';
-
-// 시작 버튼 이벤트
-startBtn.addEventListener('click', () => {
-    mainMenu.style.display = 'none';
-    gameContainer.style.display = 'flex';
-
-    // 1. 대화창 열기
-    // openDialogue(대화내용, 콜백함수)
-    openDialogue(INTRO_DIALOGUE, () => {
-        // 2. 이 안의 코드는 대화가 전부 끝나야 실행됩니다.
-        console.log("모든 대화 완료 -> 배너 실행");
-        
-        setTimeout(() => {
-            triggerStageBanner("STAGE 1 - 시작의 숲");
-        }, 500); 
-    });
-});
 
 export const INTRO_DIALOGUE = [
   { speaker: "R1", text: "접속 확인했어! 프로젝트 'Plant Back Earth' 준비 완료~" },
