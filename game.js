@@ -276,7 +276,6 @@ function showDialogueLine() {
     typeText(line.text || "");
 }
 
-// 배너를 실제로 제어하는 독립 함수
 function triggerStageBanner(text) {
     const banner = document.getElementById('stage-banner');
     if (!banner) {
@@ -284,38 +283,25 @@ function triggerStageBanner(text) {
         return;
     }
 
+    // 1. 텍스트 설정 및 스타일 초기화
     banner.innerText = text;
     banner.style.display = 'block'; 
-    banner.style.zIndex = '10001'; // 다른 UI보다 앞에 오도록 설정
+    banner.style.opacity = '1';
+    banner.style.zIndex = '10001'; 
 
-    // 애니메이션 초기화 마법의 코드
+    // 2. 애니메이션 리셋 (중요!)
     banner.classList.remove('animate-stage');
-    void banner.offsetWidth; // 💡 브라우저에게 "이 요소 다시 계산해!"라고 명령
+    void banner.offsetWidth; // 브라우저 리플로우 강제 (애니메이션 초기화)
     banner.classList.add('animate-stage');
 
-    // 3초 후(애니메이션 종료 시점) 숨김
+    // 3. 3초 후 종료 처리
     setTimeout(() => {
         banner.style.display = 'none';
         banner.classList.remove('animate-stage');
     }, 3000);
 }
-    // 1. 텍스트 설정 및 표시
-    banner.innerText = text;
-    banner.style.display = 'block';
-    banner.style.opacity = '1'; // CSS에 opacity가 0이면 1로 변경
 
-    // 2. 애니메이션 클래스 추가
-    banner.classList.remove('animate-stage'); // 혹시 남아있을 클래스 제거
-    void banner.offsetWidth; // 브라우저가 애니메이션을 다시 인식하게 만드는 마법의 코드
-    banner.classList.add('animate-stage');
 
-    // 3. 3초 후 정리 (애니메이션 시간 3s에 맞춤)
-    setTimeout(() => {
-        banner.style.display = 'none';
-        banner.classList.remove('animate-stage');
-    }, 3000);
-}
-    
 function skipTyping(){
 if (!dlgTyping) return;
 dlgTyping = false;
