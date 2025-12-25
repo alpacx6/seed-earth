@@ -1,3 +1,14 @@
+window.addEventListener('resize', () => {
+    const canvas = document.getElementById('gameCanvas');
+    // 캔버스의 내부 좌표계 해상도를 고정 (게임 로직이 깨지지 않게)
+    canvas.width = 960;
+    canvas.height = 540;
+    
+    // 비율이 유지되고 있는지 콘솔로 확인 (개발용)
+    // console.log("Current Ratio:", canvas.clientWidth / canvas.clientHeight);
+});
+
+
 // game.js (type="module")
 import { baseStages7, rand } from "./stages.js";
 import { SPEAKERS, INTRO_DIALOGUE, END_DIALOGUE, stageEnterDialogue } from "./dialogue.js";
