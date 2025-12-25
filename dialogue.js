@@ -20,6 +20,7 @@ export function stageEnterDialogue(stageIndex, stageName, ruleText){
     { speaker: "SYSTEM", text: `RULE: ${ruleText}` },
     { speaker: "ROBOT", text: "씨앗을 심고(E) 물을 주면(F) 성장합니다." },
   ];
+}
   openDialogue(introLines, () => {
         // ✅ 대화가 모두 끝난 후 실행될 로직을 여기에 작성
         console.log("모든 대화 완료! 이제 배너를 띄웁니다.");
@@ -27,7 +28,6 @@ export function stageEnterDialogue(stageIndex, stageName, ruleText){
         setTimeout(() => {
             triggerStageBanner("STAGE 1 - 시작의 숲");
         }, 500);
-}
 
 export const END_DIALOGUE = [
   { speaker: "SYSTEM", text: "Stage 7 CLEAR." },
