@@ -1350,30 +1350,27 @@ if (!running) startLoop();
 });
 }
 
-// ====== BOOT (async 필수) ======
 (async function boot(){
-close(overlay);
-close(loading);
-close(dialogue);
+    // UI 초기화
+    if (overlay) close(overlay);
+    if (loading) close(loading);
+    if (dialogue) close(dialogue);
 
-// ✅ 배경 먼저 전부 프리로드 (이게 배경 PNG 문제를 끝내는 핵심)
-await preloadStageBackgrounds();
+    // 배경 및 에셋 준비
+    if (typeof preloadStageBackgrounds === 'function') await preloadStageBackgrounds();
 
-// ✅ 플레이어 이미지도 안전 경로
-player.image.src = resolveAsset("robot.png");
-player.image.onload = () => {
-player.imgWidth = player.image.width;
-player.imgHeight = player.image.height;
-};
+    player.image.src = resolveAsset("robot.png");
+    
+    // 💡 여기서 triggerStageBanner를 절대 호출하지 마세요!
+    openDialogue(
+        [
+            { name:"SYSTEM", text:"…신호 수신. 복구 시스템 온라인." },
+            { name:"SYSTEM", text:"유닛을 깨운다." },
+        ],
+        () => { 
+            console.log("시스템 대기 중. 이제 START 버튼을 누르면 인트로가 시작됩니다."); 
+        }
+    );
 
-openDialogue(
-[
-{ name:"??", text:"…신호 수신. 복구 시스템 온라인." },
-{ name:"??", text:"유닛을 깨운다." },
-],
-async () => { await runIntroAndStart(); }
-);
-
-render();
-renderOwnedCards();
+    render(); // 초기 화면만 그림
 })();
