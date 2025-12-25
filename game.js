@@ -1,4 +1,5 @@
 
+alert("game.js 실행됨");
 // game.js (type="module")
 import { baseStages7, rand } from "./stages.js";
 import { SPEAKERS, INTRO_DIALOGUE, END_DIALOGUE, stageEnterDialogue } from "./dialogue.js";
@@ -42,34 +43,12 @@ const uiPlanted = document.getElementById("planted");
 const uiTotal = document.getElementById("total");
 const uiScore = document.getElementById("score");
 const uiHint = document.getElementById("hint");
-
-document.addEventListener('DOMContentLoaded', () => {
-const startBtn = document.getElementById('start-btn');
-const mainMenu = document.getElementById('main-menu');
-const gameContainer = document.getElementById('game-container');
-const stageBanner = document.getElementById('stage-banner');
-
-if (startBtn) {
-startBtn.addEventListener('click', () => {
-// 1. 메인 메뉴 숨기기
-mainMenu.style.display = 'none';
-
-// 2. 게임 화면(.app) 나타내기
-// 기존 CSS에서 .app이 flex로 잡혀있다면 'flex'라고 써주세요.
-gameContainer.style.display = 'flex'; 
-
-});
-}
-});
-
-
 // ====== utils ======
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 function overlap(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
 function open(el){ el.classList.add("is-open"); }
 function close(el){ el.classList.remove("is-open"); }
 function setHint(msg){ uiHint.textContent = msg || ""; }
-
 // ====== stage rule box ======
 function setStageRuleBox(stage){
 if (!stage?.ruleText) { stageRuleOverlay.classList.remove("is-on"); return; }
@@ -106,62 +85,48 @@ held.add(e.code);
 addEventListener("keyup", (e) => held.delete(e.code));
 function wasPressed(code) { if (pressed.has(code)) { pressed.delete(code); return true; } return false; }
 function isHeld(code){ return held.has(code); }
-
 // ====== world / physics ======
 const GRAV = 0.85;
 const GROUND_Y = 440;
-
 const platforms = [];
 const hazards = [];
 const seeds = [];
 const plots = [];
 const tornados = [];
-
 const world = {
 camX: 0,
 length: 3600,
 maxSpeedBase: 5.0,
 frictionNearGround: 0.84,
 };
-
 const player = {
 x: 120, y: 250, w: 40, h: 60,
 vx: 0, vy: -12,
 onGround: false,
-
 hp: 100,
 maxHpBase: 100,
 maxHpBonus: 0,
-
 o2: 50,
 maxO2Base: 50,
 maxO2Bonus: 0,
-
 seedInv: 0,
 planted: 0,
 score: 0,
-
 invulnMs: 0,
 jumpsMax: 1,
 extraJumpUsed: false,
-
 toxicMs: 0,
 toxicTickAcc: 0,
-
 stunMs: 0,
 slowMs: 0,
-
 freezeMs: 0,
 nextFreezeMs: 0,
-
 acidCycleMs: 0,
 acidOn: false,
 acidDmgAcc: 0,
-
 suffocatingMs: 0,
 plantCooldownMs: 0,
 waterCooldownMs: 0,
-
 image: new Image(),
 imgWidth: 30,
 imgHeight: 42,
@@ -170,7 +135,6 @@ direction: 1,
 
 function getMaxHp(){ return player.maxHpBase + player.maxHpBonus; }
 function getMaxO2(){ return player.maxO2Base + player.maxO2Bonus; }
-
 // ====== dialogue system ======
 let dlgActive = false;
 let dlgLines = [];
@@ -187,7 +151,6 @@ return new URL(rel, BASE_URL).href;
 
 function setSpeakerUI(name){
 const s = SPEAKERS[name] || { role:"SYSTEM", color:"#cfe1ff", avatar:"avatars/unknown_avatar.png" };
-
 dlgNameEl.textContent = name || "???";
 dlgRoleEl.textContent = s.role;
 dlgNameEl.style.color = s.color;
@@ -200,7 +163,6 @@ dlgAvatar.src = resolveAsset(s.avatar || "avatars/unknown_avatar.png");
 }
 
 function setAutoBtn(){ dlgAutoBtn.textContent = `AUTO: ${dlgAuto ? "ON" : "OFF"}`; }
-
 function openDialogue(lines, onDone){
 dlgActive = true;
 dlgLines = lines || [];
@@ -224,7 +186,6 @@ dlgTextEl.textContent = "";
 dlgNextEl.style.opacity = "0";
 const speed = 18;
 let i = 0;
-
 const step = () => {
 if (!dlgTyping) return;
 i++;
@@ -242,69 +203,16 @@ typingTimer = setTimeout(step, speed);
 };
 step();
 }
-
-function showDialogueLine() {
+function showDialogueLine(){
 const line = dlgLines[dlgIdx];
-
-    // 대화 리스트가 완전히 끝났을 때
-if (!line) {
-console.log("대화 리스트 끝 - 종료 시퀀스 진입");
-        closeDialogue(); // 대화창 닫기
-
-        // ✅ 대화가 완전히 끝났을 때 맡겨진 함수만 실행
-        // ✅ 등록된 '완료 콜백' 함수를 여기서 실행합니다.
-if (typeof dlgOnDone === 'function') {
-            const finalAction = dlgOnDone;
-            dlgOnDone = null; // 중복 호출 방지
-            finalAction(); 
-}
+if (!line){
+closeDialogue();
+dlgOnDone();
 return;
 }
-
-setSpeakerUI(line.speaker || line.name);
+setSpeakerUI(line.name);
 typeText(line.text || "");
 }
-
-// 배너를 실제로 제어하는 독립 함수
-function triggerStageBanner(text) {
-const banner = document.getElementById('stage-banner');
-    if (!banner) {
-        console.error("ID가 'stage-banner'인 요소를 찾을 수 없습니다.");
-        return;
-    }
-
-banner.innerText = text;
-    banner.style.display = 'block'; 
-    banner.style.zIndex = '10001'; // 다른 UI보다 앞에 오도록 설정
-
-    // 애니메이션 초기화 마법의 코드
-banner.classList.remove('animate-stage');
-    void banner.offsetWidth; // ✅ 애니메이션 리셋
-    banner.classList.add('animate-stage');
-
-    // 3초 후(애니메이션 종료 시점) 숨김
-setTimeout(() => {
-banner.style.display = 'none';
-        banner.classList.remove('animate-stage');
-}, 3000);
-}
-
-// 1. 텍스트 설정 및 표시
-const banner = document.getElementById('stage-banner');
-banner.style.display = 'block';
-banner.style.opacity = '1'; // CSS에 opacity가 0이면 1로 변경
-
-// 2. 애니메이션 클래스 추가
-banner.classList.remove('animate-stage'); // 혹시 남아있을 클래스 제거
-void banner.offsetWidth; // 브라우저가 애니메이션을 다시 인식하게 만드는 마법의 코드
-banner.classList.add('animate-stage');
-
-// 3. 3초 후 정리 (애니메이션 시간 3s에 맞춤)
-setTimeout(() => {
-banner.style.display = 'none';
-banner.classList.remove('animate-stage');
-}, 3000);
-
 function skipTyping(){
 if (!dlgTyping) return;
 dlgTyping = false;
@@ -364,7 +272,6 @@ loadingText.textContent = LOADING_QUOTES[Math.floor(Math.random()*LOADING_QUOTES
 await new Promise(r=>setTimeout(r, 900));
 close(loading);
 }
-
 // ====== cards ======
 const RARITY = {
 common:    { name:"일반",      w:0.60, cls:"r-common" },
@@ -394,17 +301,14 @@ const CARD_DEFS = [
 { id:"o2_plus3", rarity:"common", name:"산소 공급", emoji:"🌿", desc:"식물 O₂ 획득량 +3", type:"o2bonus", value:3 },
 { id:"speed_10", rarity:"common", name:"빠른 속도", emoji:"🏃", desc:"이동 속도 +10%", type:"speed", tier:1 },
 { id:"heal_fast", rarity:"common", name:"가속화", emoji:"⏱️", desc:"식물 옆 대기 시간이 0.5초로 감소", type:"healhold", ms:500 },
-
 { id:"hp_30", rarity:"rare", name:"체력 증가+", emoji:"💗", desc:"최대체력 +30 (업그레이드)", type:"hp", tier:2, requires:["hp_15"] },
 { id:"speed_20", rarity:"rare", name:"더 빠른 속도", emoji:"⚡", desc:"이동 속도 +20% (업그레이드)", type:"speed", tier:2, requires:["speed_10"] },
 { id:"o2_plus6", rarity:"rare", name:"더 많은 산소 공급", emoji:"🍃", desc:"식물 O₂ 획득량 +6 (업그레이드)", type:"o2bonus", value:6, requires:["o2_plus3"] },
-
 { id:"instant_o2", rarity:"epic", name:"슈퍼 가속화", emoji:"✨", desc:"식물에 물을 주면 즉시 O₂ 획득", type:"instant_o2" },
 { id:"spike_remove", rarity:"epic", name:"가시 제거기", emoji:"🧹", desc:"R키: 모든 가시 제거 (1회용)", type:"activate", act:"spike_remove", oneTime:true },
 { id:"poison_remove", rarity:"epic", name:"독성 제거기", emoji:"🧪", desc:"R키: 모든 독성 제거 (1회용)", type:"activate", act:"poison_remove", oneTime:true },
 { id:"o2_generator", rarity:"epic", name:"산소 공급기", emoji:"🔋", desc:"3초마다 O₂ +5", type:"periodic_o2" },
 { id:"speed_30", rarity:"epic", name:"매우 빠른 속도", emoji:"💨", desc:"이동 속도 +30% (업그레이드)", type:"speed", tier:3, requires:["speed_20"] },
-
 { id:"double_jump", rarity:"legendary", name:"더블 점프!", emoji:"🦘", desc:"공중 점프 1회 추가", type:"double_jump" },
 ];
 
@@ -419,8 +323,8 @@ const suffix = def.oneTime ? (st?.usesLeft ? " (1회)" : " (소모)") : "";
 const item = document.createElement("div");
 item.className = "ownedCard";
 item.innerHTML = `<span class="emo">${def.emoji}</span>
-    <span><b>${def.name}</b>${suffix}<br/>
-    <span style="color:#9bb0d0;font-size:12px">${def.desc}</span></span>`;
+     <span><b>${def.name}</b>${suffix}<br/>
+     <span style="color:#9bb0d0;font-size:12px">${def.desc}</span></span>`;
 ownedCardsEl.appendChild(item);
 }
 }
@@ -487,7 +391,6 @@ const st = owned.get(id);
 if (!st || st.usesLeft <= 0 || oneTimeUsed.has(id)) return;
 const def = defById(id);
 if (!def) return;
-
 if (def.act === "spike_remove"){
 for (let i=hazards.length-1;i>=0;i--) if (hazards[i].kind==="spike") hazards.splice(i,1);
 setHint("✅ 가시 제거기 사용!");
@@ -501,18 +404,15 @@ st.usesLeft = 0;
 oneTimeUsed.add(id);
 renderOwnedCards();
 }
-
 let cardPickActive = false;
 let cardPickTimer = 0;
 let cardOptions = [];
 let stageReady = false;
-
 function showCardPick(stageIndex){
 cardPickActive = true;
 cardPickTimer = 5.0;
 open(overlay);
 cardTitleEl.textContent = `스테이지 ${stageIndex+1} 시작 - 카드 선택`;
-
 const opts = [];
 let guard = 0;
 while (opts.length < 3 && guard++ < 80){
@@ -537,10 +437,10 @@ cardOptions.forEach((c, idx)=>{
 const div = document.createElement("div");
 div.className = `card ${RARITY[c.rarity].cls}`;
 div.innerHTML = `
-    <div class="rarity">${RARITY[c.rarity].name} 카드</div>
-    <div class="name">${c.name}</div>
-    <div class="emoji">${c.emoji}</div>
-    <div class="desc">${c.desc}</div>`;
+     <div class="rarity">${RARITY[c.rarity].name} 카드</div>
+     <div class="name">${c.name}</div>
+     <div class="emoji">${c.emoji}</div>
+     <div class="desc">${c.desc}</div>`;
 div.addEventListener("click", ()=>chooseCard(idx));
 cardRow.appendChild(div);
 });
@@ -557,11 +457,9 @@ function autoChooseCard(){
 const idx = Math.floor(Math.random()*cardOptions.length);
 chooseCard(idx);
 }
-
 // ====== stages ======
 const STAGES = baseStages7();
 let currentStageIndex = 0;
-
 // HUD
 function syncHud(){
 uiStage.textContent = String(currentStageIndex+1);
@@ -574,7 +472,6 @@ uiPlanted.textContent = String(player.planted);
 uiTotal.textContent = String(plots.length);
 uiScore.textContent = String(player.score);
 }
-
 // 발판 높이
 function getSurfaceY(targetX) {
 let bestY = GROUND_Y;
@@ -585,20 +482,16 @@ if (p.y < bestY) bestY = p.y;
 }
 return bestY;
 }
-
 function buildStage(stageIndex){
 const S = STAGES[stageIndex];
 world.length = S.length;
 world.camX = 0;
-
 platforms.length = 0;
 hazards.length = 0;
 seeds.length = 0;
 plots.length = 0;
 tornados.length = 0;
-
 platforms.push({ x:0, y:GROUND_Y, w:world.length, h:120, type:"ground", toxic:false });
-
 (S.steps||[]).forEach((s, i) => {
 const isToxic = (S.toxicSteps||[]).includes(i);
 platforms.push({ ...s, type:"rock", toxic:isToxic });
@@ -606,11 +499,9 @@ platforms.push({ ...s, type:"rock", toxic:isToxic });
 
 (S.spikes||[]).forEach(x => hazards.push({ x, y:GROUND_Y-18, w:46, h:18, kind:"spike" }));
 (S.orbs||[]).forEach(o => hazards.push({ x:o.x, y:o.baseY, baseY:o.baseY, w:34, h:34, kind:"orb", t:0 }));
-
 (S.seedXs||[]).forEach((sx) => {
 const seedSurfaceY = getSurfaceY(sx + 9);
 seeds.push({ x:sx, y: seedSurfaceY - 35, w:24, h:24, taken:false });
-
 const plotX = sx + 90;
 const plotSurfaceY = getSurfaceY(plotX + 14);
 plots.push({
@@ -620,7 +511,6 @@ w: 28, h: 18,
 planted:false, watered:false, o2Given:false, holdMs:0, plantMs:0,
 });
 });
-
 if (S.windZones?.count){
 for (let i=0;i<S.windZones.count;i++){
 const x = rand(600, world.length-400);
@@ -628,54 +518,42 @@ const y = rand(220, 360);
 tornados.push({ x, y, w: 54, h: 170, t: rand(0,10) });
 }
 }
-
 setStageRuleBox(S);
 syncHud();
 }
-
 function resetPlayerForStage(keepScore=true){
 player.x = 120; player.y = 250;
 player.vx = 0; player.vy = 0;
 player.onGround = false;
-
 player.hp = getMaxHp();
 player.o2 = getMaxO2();
 player.seedInv = 0;
 player.planted = 0;
 if (!keepScore) player.score = 0;
-
 player.invulnMs = 0;
 player.extraJumpUsed = false;
-
 player.toxicMs = 0; player.toxicTickAcc = 0;
 player.stunMs = 0; player.slowMs = 0;
 player.freezeMs = 0;
-
 const S = STAGES[currentStageIndex];
 player.nextFreezeMs = S?.snow ? rand(S.snow.freezeMinMs, S.snow.freezeMaxMs) : 0;
-
 player.acidCycleMs = 0;
 player.acidOn = false;
 player.acidDmgAcc = 0;
-
 player.suffocatingMs = 0;
 warnOverlay.classList.remove("is-on");
 syncHud();
 }
-
 async function beginStage(stageIndex, withCardPick=true){
 currentStageIndex = stageIndex;
 buildStage(currentStageIndex);
 resetPlayerForStage(true);
-
 stageReady = false;
-
 openDialogue(stageEnterDialogue(STAGES[stageIndex].name, STAGES[stageIndex].ruleText), ()=>{
 if (withCardPick) showCardPick(currentStageIndex);
 else stageReady = true;
 });
 }
-
 async function restartStageNoCard(){
 hideCardPick();
 stageReady = false;
@@ -685,7 +563,6 @@ resetPlayerForStage(true);
 stageReady = true;
 if (!running) startLoop();
 }
-
 async function goNextStage(){
 const next = currentStageIndex + 1;
 stageReady = false;
@@ -693,12 +570,10 @@ await showLoadingLine();
 await beginStage(next, true);
 if (!running) startLoop();
 }
-
 function resetAllGameState(){
 owned.clear();
 pickedOnce.clear();
 oneTimeUsed.clear();
-
 upgrade.hpTier = 0;
 upgrade.speedTier = 0;
 upgrade.oxygenBonus = 0;
@@ -710,14 +585,11 @@ upgrade.shields.poison = 0;
 upgrade.shields.spike = 0;
 upgrade.hasActivatable = false;
 upgrade.activatableId = null;
-
 player.maxHpBonus = 0;
 player.jumpsMax = 1;
 player.score = 0;
-
 renderOwnedCards();
 }
-
 function getCardSpeedMultiplier(){
 if (upgrade.speedTier === 3) return 1.30;
 if (upgrade.speedTier === 2) return 1.20;
@@ -737,35 +609,28 @@ return 1.00;
 function getTotalSpeedMultiplier(){
 return getCardSpeedMultiplier() * getStageSpeedMultiplier() * getDebuffSpeedMultiplier();
 }
-
 // ====== background preload/draw (핵심!) ======
 const BG_CACHE = new Map();
-
 async function preloadStageBackgrounds(){
 const list = STAGES.map(s => s.bgImage).filter(Boolean);
 const uniq = [...new Set(list)];
-
 await Promise.all(
 uniq.map(rel => new Promise((resolve) => {
 const img = new Image();
 img.onload = () => { BG_CACHE.set(rel, img); resolve(); };
 img.onerror = () => { console.warn("BG load fail:", rel); resolve(); };
-
 // ✅ 무조건 seed-earth/ 기준으로 안전하게 로드됨
 img.src = resolveAsset(rel);
 }))
 );
 }
-
 function drawBackground(stage){
 const rel = stage?.bgImage;
 const img = rel ? BG_CACHE.get(rel) : null;
-
 if (img && img.complete && img.naturalWidth > 0){
 ctx.drawImage(img, 0, 0, W, H);
 return;
 }
-
 // fallback gradient
 const g = ctx.createLinearGradient(0, 0, 0, H);
 const tone = stage?.bg?.theme || "default";
@@ -790,7 +655,6 @@ g.addColorStop(1, "rgb(20,20,40)");
 }
 ctx.fillStyle = g;
 ctx.fillRect(0,0,W,H);
-
 if (rel && !img){
 ctx.save();
 ctx.fillStyle = "rgba(255,255,255,0.75)";
@@ -800,13 +664,11 @@ ctx.fillText("배경 로딩 중…", W/2, H/2);
 ctx.restore();
 }
 }
-
 // ====== main loop ======
 function loop(t){
 if (!running) return;
 const dt = Math.min(32, t - lastT);
 lastT = t;
-
 if (cardPickActive){
 cardPickTimer -= dt/1000;
 cardTimerEl.textContent = Math.max(0, cardPickTimer).toFixed(1);
@@ -822,7 +684,6 @@ rafId = requestAnimationFrame(loop);
 pressed.clear();
 return;
 }
-
 update(dt);
 render();
 rafId = requestAnimationFrame(loop);
@@ -832,9 +693,7 @@ pressed.clear();
 function update(dt){
 if (wasPressed("KeyQ")) { restartStageNoCard(); return; }
 if (wasPressed("KeyR")) useActivatableCard();
-
 const S = STAGES[currentStageIndex];
-
 if (upgrade.periodicO2){
 upgrade.periodicTimer += dt;
 if (upgrade.periodicTimer >= 3000){
@@ -843,10 +702,8 @@ player.o2 = clamp(player.o2 + 5, 0, getMaxO2());
 player.score += 10;
 }
 }
-
 player.o2 -= (2.0 * dt / 1000);
 if (player.o2 < 0) player.o2 = 0;
-
 const isSuffocating = (player.o2 <= 0.01);
 if (isSuffocating){
 player.suffocatingMs += dt;
@@ -859,13 +716,11 @@ player.suffocatingMs = 0;
 player.suffocatingMs = 0;
 warnOverlay.classList.remove("is-on");
 }
-
 if (S?.acidRain){
 player.acidCycleMs += dt;
 const cycle = S.acidRain.onMs + S.acidRain.offMs;
 const m = player.acidCycleMs % cycle;
 player.acidOn = (m >= S.acidRain.offMs);
-
 if (player.acidOn){
 player.acidDmgAcc += dt;
 while (player.acidDmgAcc >= 1000){
@@ -878,7 +733,6 @@ player.acidDmgAcc = 0;
 } else {
 player.acidOn = false;
 }
-
 if (S?.snow){
 if (player.nextFreezeMs > 0){
 player.nextFreezeMs -= dt;
@@ -889,38 +743,30 @@ setHint("🥶 빙결! 2초간 움직일 수 없습니다.");
 }
 }
 }
-
 if (player.stunMs > 0) player.stunMs -= dt;
 if (player.slowMs > 0) player.slowMs -= dt;
 if (player.freezeMs > 0) player.freezeMs -= dt;
 if (player.stunMs < 0) player.stunMs = 0;
 if (player.slowMs < 0) player.slowMs = 0;
 if (player.freezeMs < 0) player.freezeMs = 0;
-
 const left  = isHeld("ArrowLeft") || isHeld("KeyA");
 const right = isHeld("ArrowRight") || isHeld("KeyD");
 const jumpPressed  = wasPressed("Space") || wasPressed("ArrowUp") || wasPressed("KeyW");
 const plantPressed = wasPressed("KeyE");
 const waterPressed = wasPressed("KeyF");
-
 const canAct = (player.stunMs <= 0 && player.freezeMs <= 0);
-
 if (left) player.direction = -1;
 if (right) player.direction = 1;
-
 const accelBase = 1.65;
 const maxSpd = world.maxSpeedBase * getTotalSpeedMultiplier();
 const suffMul = isSuffocating ? 0.72 : 1.00;
-
 if (canAct){
 if (left) player.vx -= accelBase * suffMul;
 if (right) player.vx += accelBase * suffMul;
 }
-
 const nearGround = player.y + player.h > 390;
 player.vx *= nearGround ? world.frictionNearGround : 0.90;
 player.vx = clamp(player.vx, -maxSpd*suffMul, maxSpd*suffMul);
-
 if (jumpPressed && canAct){
 if (player.onGround){
 player.vy = -15.8;
@@ -931,18 +777,14 @@ player.vy = -15.0;
 player.extraJumpUsed = true;
 }
 }
-
 player.vy += GRAV;
 player.vy = clamp(player.vy, -30, 20);
-
 player.x += player.vx;
 player.y += player.vy;
 player.x = clamp(player.x, 0, world.length - player.w);
-
 // collisions
 player.onGround = false;
 let stoodPlatform = null;
-
 for (const p of platforms){
 const rP = { x:p.x, y:p.y, w:p.w, h:p.h };
 const r  = { x:player.x, y:player.y, w:player.w, h:player.h };
@@ -964,7 +806,6 @@ player.vx *= 0.2;
 }
 }
 }
-
 // stage3 toxic platform DOT
 if (stoodPlatform?.toxic){
 player.toxicMs = Math.max(player.toxicMs, 3000);
@@ -982,7 +823,6 @@ player.toxicMs = 0;
 player.toxicTickAcc = 0;
 }
 }
-
 // seed pickup
 for (const s of seeds){
 if (s.taken) continue;
@@ -993,7 +833,6 @@ player.score += 120 + currentStageIndex * 25;
 setHint("씨앗 획득! 심는 자리에서 E로 심기");
 }
 }
-
 // plant / water
 if (plantPressed && player.plantCooldownMs <= 0 && canAct){
 for (const pl of plots){
@@ -1015,16 +854,13 @@ player.plantCooldownMs = 1000;
 break;
 }
 }
-
 if (waterPressed && player.waterCooldownMs <= 0 && canAct){
 for (const pl of plots){
 if (!pl.planted || pl.watered || pl.plantMs <= 800) continue;
 const near = overlap({x:player.x,y:player.y,w:player.w,h:player.h},{x:pl.x-18,y:pl.y-36,w:pl.w+36,h:pl.h+72});
 if (!near) continue;
-
 pl.watered = true;
 pl.holdMs = 0;
-
 if (upgrade.instantOxygen && !pl.o2Given){
 const gain = 10 + upgrade.oxygenBonus;
 player.o2 = clamp(player.o2 + gain, 0, getMaxO2());
@@ -1036,15 +872,12 @@ player.waterCooldownMs = 1000;
 break;
 }
 }
-
 if (player.invulnMs > 0) player.invulnMs -= dt;
 player.plantCooldownMs = Math.max(0, player.plantCooldownMs - dt);
 player.waterCooldownMs = Math.max(0, player.waterCooldownMs - dt);
-
 for (const pl of plots){
 if (pl.planted && !pl.watered) pl.plantMs += dt;
 }
-
 // hazards
 for (const h of hazards){
 if (h.kind === "orb"){
@@ -1079,7 +912,6 @@ player.vy = -6;
 }
 }
 }
-
 // stage4 tornado
 for (const tw of tornados){
 tw.t += dt * 0.002;
@@ -1094,7 +926,6 @@ player.slowMs = Math.max(player.slowMs, 5000);
 setHint("🌪️ 회오리! 2초 행동불가 + 5초 이속 감소");
 }
 }
-
 // death
 if (player.hp <= 0){
 player.hp = 0;
@@ -1109,15 +940,12 @@ openDialogue(
 syncHud();
 return;
 }
-
 world.camX = clamp(player.x - W*0.35, 0, world.length - W);
-
 // plant O2 gain
 for (const pl of plots){
 if (!pl.planted) continue;
 if (!pl.watered) { pl.holdMs = 0; continue; }
 if (pl.o2Given) continue;
-
 const nearPlant = overlap({x:player.x,y:player.y,w:player.w,h:player.h},{x:pl.x-22,y:pl.y-48,w:pl.w+44,h:pl.h+96});
 if (nearPlant){
 pl.holdMs += dt;
@@ -1131,7 +959,6 @@ setHint(`O₂ +${gain} (식물)`);
 }
 } else pl.holdMs = 0;
 }
-
 // clear
 if (player.planted >= plots.length){
 stopLoop();
@@ -1157,7 +984,6 @@ return;
 
 syncHud();
 }
-
 // ====== rendering helpers ======
 function drawPulseRing(cx, cy, baseR, t, strokeA, strokeB){
 const p = (Math.sin(t) + 1)/2;
@@ -1183,13 +1009,10 @@ ctx.fillStyle = "rgba(255,255,255,0.92)";
 ctx.fillText(text, x, y-2);
 ctx.restore();
 }
-
 function render(){
 ctx.clearRect(0,0,W,H);
 const S = STAGES[currentStageIndex] || STAGES[0];
-
 drawBackground(S);
-
 if (player.o2 <= 0.01){
 ctx.fillStyle = "rgba(10,0,0,0.12)";
 ctx.fillRect(0,0,W,H);
@@ -1207,7 +1030,6 @@ ctx.fillRect(x, y, 2, 10);
 }
 ctx.restore();
 }
-
 // freeze overlay
 if (player.freezeMs > 0){
 ctx.save();
@@ -1216,10 +1038,8 @@ ctx.fillStyle = "rgba(160,220,255,1)";
 ctx.fillRect(0,0,W,H);
 ctx.restore();
 }
-
 ctx.save();
 ctx.translate(-world.camX, 0);
-
 // platforms
 for (const p of platforms){
 if (p.type==="ground"){
@@ -1240,7 +1060,6 @@ ctx.strokeRect(p.x,p.y,p.w,p.h);
 }
 }
 }
-
 // seeds (simple)
 ctx.fillStyle = "rgba(255,255,255,0.9)";
 for (const s of seeds){
@@ -1252,16 +1071,13 @@ ctx.fillStyle = "rgba(60,220,140,0.9)";
 ctx.fillRect(s.x+10, s.y+8, 4, 12);
 ctx.fillStyle = "rgba(255,255,255,0.9)";
 }
-
 // plots
 const time = performance.now()*0.004;
 for (const pl of plots){
 ctx.fillStyle="rgba(20,16,10,0.65)";
 ctx.fillRect(pl.x, pl.y, pl.w, pl.h);
-
 const cx = pl.x + pl.w/2;
 const cy = pl.y + pl.h/2;
-
 if (!pl.planted){
 drawPulseRing(cx, cy, 16, time, "rgba(120,255,180,0.95)", "rgba(255,255,255,0.35)");
 } else {
@@ -1274,7 +1090,6 @@ drawTextTag(pl.x-10, pl.y-12, "HOLD…");
 }
 }
 }
-
 // hazards
 for (const h of hazards){
 if (h.kind==="spike"){
@@ -1294,7 +1109,6 @@ ctx.strokeStyle="rgba(255,255,255,0.22)";
 ctx.stroke();
 }
 }
-
 // tornados
 for (const tw of tornados){
 const wobble = Math.sin(tw.t) * 10;
@@ -1310,22 +1124,18 @@ ctx.strokeStyle = "rgba(255,255,255,0.35)";
 ctx.strokeRect(x, tw.y, tw.w, tw.h);
 ctx.restore();
 }
-
 // player sprite
 const blink = player.invulnMs > 0 && Math.floor(performance.now()/80)%2===0;
 ctx.globalAlpha = blink ? 0.35 : 1;
-
 const aspect = player.imgWidth / player.imgHeight;
 let dWidth, dHeight;
 if (aspect > player.w / player.h) { dWidth = player.w; dHeight = player.w / aspect; }
 else { dHeight = player.h; dWidth = player.h * aspect; }
 const dx = player.x + (player.w - dWidth) / 2;
 const dy = player.y + (player.h - dHeight) / 2;
-
 ctx.save();
 ctx.translate(dx + dWidth / 2, dy + dHeight / 2);
 ctx.scale(player.direction, 1);
-
 if (player.image.complete && player.image.naturalWidth > 0){
 ctx.drawImage(player.image, -dWidth / 2, -dHeight / 2, dWidth, dHeight);
 } else {
@@ -1333,11 +1143,9 @@ ctx.fillStyle = "rgba(120,255,180,0.9)";
 ctx.fillRect(-dWidth/2, -dHeight/2, dWidth, dHeight);
 }
 ctx.restore();
-
 ctx.globalAlpha = 1;
 ctx.restore();
 }
-
 // ====== start ======
 async function runIntroAndStart(){
 resetAllGameState();
@@ -1349,28 +1157,30 @@ renderOwnedCards();
 if (!running) startLoop();
 });
 }
-
+// ====== BOOT (async 필수) ======
 (async function boot(){
-    // UI 초기화
-    if (overlay) close(overlay);
-    if (loading) close(loading);
-    if (dialogue) close(dialogue);
+close(overlay);
+close(loading);
+close(dialogue);
+// ✅ 배경 먼저 전부 프리로드 (이게 배경 PNG 문제를 끝내는 핵심)
+await preloadStageBackgrounds();
+// ✅ 플레이어 이미지도 안전 경로
+player.image.src = resolveAsset("robot.png");
+player.image.onload = () => {
+player.imgWidth = player.image.width;
+player.imgHeight = player.image.height;
+};
 
-    // 배경 및 에셋 준비
-    if (typeof preloadStageBackgrounds === 'function') await preloadStageBackgrounds();
+openDialogue(
+[
+{ name:"??", text:"…신호 수신. 복구 시스템 온라인." },
+{ name:"??", text:"유닛을 깨운다." },
+],
+async () => { await runIntroAndStart(); }
+);
 
-    player.image.src = resolveAsset("robot.png");
-    
-    // 💡 여기서 triggerStageBanner를 절대 호출하지 마세요!
-    openDialogue(
-        [
-            { name:"SYSTEM", text:"…신호 수신. 복구 시스템 온라인." },
-            { name:"SYSTEM", text:"유닛을 깨운다." },
-        ],
-        () => { 
-            console.log("시스템 대기 중. 이제 START 버튼을 누르면 인트로가 시작됩니다."); 
-        }
-    );
-
-    render(); // 초기 화면만 그림
+render();
+renderOwnedCards();
 })();
+
+There are no files selected for viewing
