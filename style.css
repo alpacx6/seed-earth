@@ -104,8 +104,7 @@ background: linear-gradient(180deg, var(--glass1), var(--glass2));
 border: 1px solid rgba(255,255,255,.06);
 box-shadow: var(--shadow);
 min-height: 66px;
-
-
+flex-shrink: 0; /* 화면이 작아져도 상단바가 찌그러지지 않게 함 */
 }
 
 .brand{ display:flex; align-items:center; gap:12px; }
