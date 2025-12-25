@@ -44,6 +44,38 @@ const uiTotal = document.getElementById("total");
 const uiScore = document.getElementById("score");
 const uiHint = document.getElementById("hint");
 
+document.addEventListener('DOMContentLoaded', () => {
+    const startBtn = document.getElementById('start-btn');
+    const mainMenu = document.getElementById('main-menu');
+    const gameScreen = document.getElementById('game-screen');
+
+    // 시작 버튼 클릭 이벤트
+    if (startBtn) {
+        startBtn.addEventListener('click', () => {
+            console.log("버튼 클릭됨!"); // 작동 확인용
+            
+            // 화면 전환
+            mainMenu.style.display = 'none';
+            gameScreen.style.display = 'flex';
+            
+            // 스테이지 알림 실행
+            showStageTitle("STAGE 1 - 시작의 숲");
+        });
+    }
+});
+
+function showStageTitle(text) {
+    const banner = document.createElement('div');
+    banner.className = 'stage-banner animate-stage';
+    banner.innerText = text;
+    document.body.appendChild(banner);
+
+    setTimeout(() => {
+        banner.remove();
+    }, 3000);
+}
+
+
 // ====== utils ======
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 function overlap(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
@@ -57,37 +89,6 @@ if (!stage?.ruleText) { stageRuleOverlay.classList.remove("is-on"); return; }
 stageRuleOverlay.innerHTML = `<span class="tag">RULE</span>${stage.ruleText}`;
 stageRuleOverlay.classList.add("is-on");
 }
-
-function startGame() {
-            // 1. 메인 메뉴 숨기기
-            const menu = document.getElementById('main-menu');
-            menu.style.display = 'none';
-
-            // 2. 게임 화면 보여주기
-            const game = document.getElementById('game-screen');
-            game.style.display = 'flex'; // 혹은 block
-
-            // 3. 게임 시작 로직 실행 (스테이지 이름 띄우기)
-            showStageTitle("STAGE 1 - 시작의 숲");
-            
-            // 여기에 게임 루프 시작 함수 등을 넣으면 됩니다.
-            // example: gameLoop();
-        }
-
-        function showStageTitle(text) {
-            // 배너 생성
-            const banner = document.createElement('div');
-            banner.classList.add('stage-banner');
-            banner.classList.add('animate-stage'); // 애니메이션 클래스 추가
-            banner.innerText = text;
-            
-            document.body.appendChild(banner);
-
-            // 3초 뒤 제거
-            setTimeout(() => {
-                banner.remove();
-            }, 3000); 
-        }
 
 // ====== loop control ======
 let running = false;
