@@ -304,7 +304,6 @@ setTimeout(() => {
 banner.style.display = 'none';
 banner.classList.remove('animate-stage');
 }, 3000);
-}
 
 function skipTyping(){
 if (!dlgTyping) return;
