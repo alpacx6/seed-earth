@@ -246,18 +246,20 @@ step();
 function showDialogueLine() {
     const line = dlgLines[dlgIdx];
 
+    // 대화 리스트가 완전히 끝났을 때
     if (!line) {
         console.log("대화 리스트 끝 - 종료 시퀀스 진입");
-        closeDialogue(); // 대화창 닫기
+        closeDialogue(); // 대화창 닫기 (id="dialogue" 숨김)
 
-        // ✅ 대화가 완전히 끝났을 때 맡겨진 함수만 실행
+        // ✅ 등록된 '완료 콜백' 함수를 여기서 실행합니다.
         if (typeof dlgOnDone === 'function') {
-            const tempCallback = dlgOnDone;
-            dlgOnDone = null; // 중복 방지
-            tempCallback();
+            const finalAction = dlgOnDone;
+            dlgOnDone = null; // 중복 호출 방지
+            finalAction(); 
         }
         return;
     }
+
     setSpeakerUI(line.speaker || line.name);
     typeText(line.text || "");
 }
@@ -265,22 +267,26 @@ function showDialogueLine() {
 // 배너를 실제로 제어하는 독립 함수
 function triggerStageBanner(text) {
     const banner = document.getElementById('stage-banner');
-    if (!banner) return;
+    if (!banner) {
+        console.error("ID가 'stage-banner'인 요소를 찾을 수 없습니다.");
+        return;
+    }
 
     banner.innerText = text;
-    banner.style.display = 'block'; // ✅ 강제 표시
-    banner.style.opacity = '1';
-    banner.style.zIndex = '10001'; // ✅ 대화창보다 위
+    banner.style.display = 'block'; 
+    banner.style.zIndex = '10001'; // 다른 UI보다 앞에 오도록 설정
 
+    // 애니메이션 초기화 마법의 코드
     banner.classList.remove('animate-stage');
-    void banner.offsetWidth; // ✅ 애니메이션 리셋
+    void banner.offsetWidth; // 💡 브라우저에게 "이 요소 다시 계산해!"라고 명령
     banner.classList.add('animate-stage');
 
+    // 3초 후(애니메이션 종료 시점) 숨김
     setTimeout(() => {
         banner.style.display = 'none';
+        banner.classList.remove('animate-stage');
     }, 3000);
 }
-
     // 1. 텍스트 설정 및 표시
     banner.innerText = text;
     banner.style.display = 'block';
