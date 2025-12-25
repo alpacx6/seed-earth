@@ -250,7 +250,11 @@ function showDialogueLine(){
     dlgOnDone();
     return;
   }
-  setSpeakerUI(line.name);
+  
+  // ✅ 수정됨: dialogue.js의 'speaker' 속성을 먼저 확인하고, 없으면 'name'을 확인
+  const speakerKey = line.speaker || line.name; 
+  
+  setSpeakerUI(speakerKey);
   typeText(line.text || "");
 }
 function skipTyping(){
