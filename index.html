@@ -1,154 +1,136 @@
-<!doctype html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Plant Back Earth</title>
-  <link rel="stylesheet" href="./style.css?v=final_ui_2">
-  <link rel="icon" href="./favicon.ico">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Plant Back Earth - 지구 재생</title>
+
+  <!-- 캐시 방지: 숫자만 바꿔 -->
+  <link rel="stylesheet" href="./style.css?v=ui_full_01">
+<link rel="icon" href="./favicon.ico">
 </head>
 
 <body>
   <div class="app">
 
-    <!-- TOP BAR (원하는 UI의 상단바) -->
+    <!-- TOP BAR -->
     <header class="topbar">
       <div class="brand">
         <div class="brandIcon">
-          <img src="./robot.png" alt="robot" onerror="this.style.display='none'">
+          <span class="bot">🤖</span>
+          <span class="leaf">🌱</span>
         </div>
         <div class="brandText">
-          <div class="brandTitle">Plant Back Earth</div>
+          <div class="brandName">Plant Back Earth</div>
           <div class="brandSub">2D 파쿠르 · 지구 재생 프로젝트</div>
         </div>
-      </div>
-
-      <div class="hudRow">
-        <div class="pill"><span class="k">Stage</span><b id="stage">1</b></div>
-        <div class="pill"><span class="k">HP</span><b><span id="hp">100</span>/<span id="maxHp">100</span></b></div>
-        <div class="pill"><span class="k">O₂</span><b><span id="o2">50</span>/<span id="maxO2">50</span></b></div>
-        <div class="pill"><span class="k">Seeds</span><b id="seedInv">0</b></div>
-        <div class="pill"><span class="k">Planted</span><b><span id="planted">0</span>/<span id="total">0</span></b></div>
-        <div class="pill"><span class="k">Score</span><b id="score">0</b></div>
-      </div>
+</div>
+      
+      <!-- HUD pills (id는 game.js 호환) -->
+      <div class="hud">
+        <div class="pill"><span class="k">Stage</span><b class="v" id="stage">1</b></div>
+        <div class="pill"><span class="k">HP</span><b class="v"><span id="hp">100</span>/<span id="maxHp">100</span></b></div>
+        <div class="pill"><span class="k">O₂</span><b class="v"><span id="o2">50</span>/<span id="maxO2">50</span></b></div>
+        <div class="pill"><span class="k">Seeds</span><b class="v" id="seedInv">0</b></div>
+        <div class="pill"><span class="k">Planted</span><b class="v"><span id="planted">0</span>/<span id="total">0</span></b></div>
+        <div class="pill"><span class="k">Score</span><b class="v" id="score">0</b></div>
+</div>
     </header>
-
+    
     <!-- MAIN -->
-    <main class="main">
-      <!-- GAME FRAME -->
-      <section class="gameFrame">
-        <canvas id="gameCanvas"></canvas>
+    <main class="content">
+      <!-- GAME -->
+      <section class="gameShell">
+        <canvas id="gameCanvas" width="960" height="540"></canvas>
 
-        <!-- 산소 0 경고 -->
+  
+        <!-- O2 0 warning (id 유지) -->
         <div id="warnOverlay" class="warnOverlay">
           <div class="warnChip">
-            <span class="warnDot"></span>
-            <span class="warnTxt">⚠ 산소가 0입니다! HP 감소 중…</span>
+            <span class="dot"></span>
+            <span class="txt">⚠ 산소가 0입니다! HP 감소 중…</span>
           </div>
         </div>
-
-        <!-- 로딩 -->
-        <div id="loading" class="loading is-open">
-          <div class="loadingBox">
-            <div class="spinner"></div>
-            <div class="loadingTitle">LOADING</div>
-            <div id="loadingText" class="loadingText">Assets loading…</div>
-          </div>
-        </div>
-
-        <!-- 카드 선택 오버레이 -->
-        <div id="cardOverlay" class="overlay">
-          <div class="overlayCard">
-            <div class="overlayTop">
-              <div id="cardTitle" class="overlayTitle">스테이지 시작 - 카드 선택</div>
-              <div class="timer"><span id="cardTimer">5.0</span>s</div>
-            </div>
-            <div id="cardRow" class="cardRow"></div>
-            <div class="overlayHint">클릭해서 카드 선택 / 시간이 끝나면 자동 선택</div>
-          </div>
-        </div>
-
-        <!-- 시작 화면(전체 PNG 배경 + Start 버튼) -->
-        <div id="startScreen" class="screenOverlay is-open">
-          <div class="screenBg" style="background-image:url('./ui/start_bg.png');"></div>
-          <div class="screenCenter">
-            <div class="screenTitle">Plant Back Earth</div>
-            <div class="screenSub">지구를 다시 심어라.</div>
-            <button id="btnStart" class="screenBtn">START</button>
-            <div class="screenHint">←/→ 이동 · Space 점프 · E 심기 · F 물주기 · R 카드 · Shift AUTO</div>
-          </div>
-        </div>
-
-        <!-- 엔딩 화면(Stage7 클리어 시) -->
-        <div id="endScreen" class="screenOverlay">
-          <div class="screenBg" style="background-image:url('./ui/end_bg.png');"></div>
-          <div class="screenCenter">
-            <div class="screenTitle">MISSION COMPLETE</div>
-            <div id="endText" class="screenSub">지구가 다시 숨 쉬기 시작했어.</div>
-            <button id="btnRestart" class="screenBtn">RESTART</button>
-            <div class="screenHint">Q / 버튼으로 재시작</div>
-          </div>
-        </div>
-
-        <!-- 대화창(블루아카 스타일) -->
-        <div id="dialogue" class="dialogue">
-          <div class="dlgInner">
-            <div class="dlgPortrait">
-              <div class="avatarGlow"></div>
-              <div class="avatar">
-                <img id="dlgAvatar" alt="avatar" />
-                <span id="dlgAvatarFallback" style="display:none;">?</span>
+        
+        <!-- DIALOGUE (id 유지) -->
+        <div id="dialogue" class="dialogue is-open">
+          <div class="dlgWrap">
+            <div class="dlgLeft">
+              <div class="avatarFrame">
+                <img id="dlgAvatar" alt="avatar"/>
               </div>
+              <div class="avatarLabel">avatar</div>
             </div>
 
-            <div class="dlgBox">
+
+            <div class="dlgMain">
               <div class="dlgTop">
-                <div class="namePlate">
-                  <div id="dlgName" class="dlgName">???</div>
-                  <div id="dlgRole" class="dlgRole">SYSTEM</div>
+                <div class="who">
+                  <span id="dlgName" class="dlgName">연구원1</span>
+                  <span id="dlgRole" class="dlgRole">LAB-01</span>
                 </div>
-                <div class="dlgControls">
-                  <button id="dlgAutoBtn" class="miniBtn">AUTO: OFF</button>
-                  <button id="dlgSkipBtn" class="miniBtn">SKIP</button>
+                <div class="dlgBtns">
+                  <button id="dlgAutoBtn" class="btnGhost">AUTO: OFF</button>
+                  <button id="dlgSkipBtn" class="btnGhost">SKIP</button>
                 </div>
               </div>
 
-              <div class="dlgBubble">
+    
+              <div class="dlgTextArea">
                 <div id="dlgText" class="dlgText">…</div>
-                <div class="dlgHint">
-                  <span>클릭/Space: 다음</span>
-                  <span>Shift: AUTO 토글</span>
-                </div>
+              </div>
+
+              <div class="dlgBottom">
+                <div class="dlgHelp">클릭/Space: 다음</div>
+                <div class="dlgHelp">Shift: AUTO 토글</div>
               </div>
             </div>
-          </div>
-
+</div>
+        
           <div id="dlgNext" class="dlgNext">▶</div>
-        </div>
+      </div>
       </section>
-
       <!-- RIGHT SIDE -->
-      <aside class="side">
-        <div class="panelBox">
+      <aside class="right">
+        <div class="panel">
           <div class="panelTitle">보유 카드</div>
           <div id="ownedCards" class="ownedCards"></div>
         </div>
-
-        <div class="panelBox">
+        
+        <div class="panel">
           <div class="panelTitle">힌트</div>
           <div id="hint" class="hint">
             ←/→ 이동, Space 점프, E 심기, F 물주기, Q 재시작, R 카드발동, Shift 자동대화
-          </div>
-        </div>
+</div>
+</div>
 
-        <div class="panelBox">
+      
+        <div class="panel" style="display:none">
           <div class="panelTitle">RULE</div>
-          <div id="stageRuleOverlay" class="ruleText">추가 규칙 없음</div>
-        </div>
+          <div id="stageRuleOverlay" class="ruleBox">추가 규칙 없음</div>
+</div>
+ 
       </aside>
-    </main>
+</main>
+</div>
+  
+  <!-- CARD OVERLAY (id 유지) -->
+  <div id="cardOverlay" class="overlay">
+    <div class="overlayPanel">
+      <div class="overlayTop">
+        <div id="cardTitle" class="overlayTitle">스테이지 시작 - 카드 선택</div>
+        <div class="overlayTimer"><span id="cardTimer">5.0</span>s</div>
+</div>
+      <div id="cardRow" class="cardRow"></div>
+      <div class="overlayHint">클릭으로 선택</div>
+    </div>
   </div>
 
-  <script type="module" src="./game.js?v=final_ui_2"></script>
+  <!-- LOADING (id 유지) -->
+  <div id="loading" class="loading">
+    <div class="loadingBox">
+      <div class="spinner"></div>
+      <div id="loadingText" class="loadingText">Loading…</div>
+</div>
+</div>
+
+  <script type="module" src="./game.js?v=ui_full_01"></script>
 </body>
 </html>
