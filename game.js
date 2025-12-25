@@ -252,12 +252,12 @@ function showDialogueLine() {
 
         if (typeof dlgOnDone === 'function') {
             dlgOnDone();
-        }
         return;
     }
 
-    setSpeakerUI(line.name);
-    typeText(line.text || "");
+    setSpeakerUI(line.speaker); // dialogue.js 구조에 맞춰 line.name 대신 line.speaker 사용 가능
+      typeText(line.text || "");
+}
 }
 
 // 배너를 실제로 제어하는 독립 함수
