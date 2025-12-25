@@ -16,93 +16,86 @@
 }
 
 body {
-            margin: 0;
-            overflow: hidden;
-            font-family: 'Arial', sans-serif;
-            background-color: #222;
-            color: white;
-        }
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #222;
+    font-family: 'Arial', sans-serif;
+    color: white;
+}
 
-        /* 공통: 화면 가득 채우기 */
-        .screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
 
-        /* 1. 메인 메뉴 화면 스타일 */
-        #main-menu {
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d); /* 화려한 배경 */
-            z-index: 10; /* 게임 화면보다 위에 위치 */
-        }
+/* 메인 메뉴 */
+#main-menu {
+    background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+    z-index: 10;
+}
 
-        h1 {
-            font-size: 4rem;
-            text-shadow: 2px 2px 0 #000;
-            margin-bottom: 50px;
-        }
+h1 {
+    font-size: 4rem;
+    text-shadow: 3px 3px 10px rgba(0,0,0,0.5);
+    margin-bottom: 40px;
+}
 
-        /* 시작 버튼 스타일 */
-        .start-btn {
-            padding: 15px 40px;
-            font-size: 1.5rem;
-            background-color: #ffd700;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            transition: transform 0.2s;
-            font-weight: bold;
-            color: #333;
-        }
-        .start-btn:hover {
-            transform: scale(1.1); /* 마우스 올리면 커짐 */
-            background-color: #ffeb3b;
-        }
+.start-btn {
+    padding: 15px 50px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+    background-color: #ffd700;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    transition: transform 0.2s, background-color 0.2s;
+}
 
-        /* 2. 게임 화면 스타일 (처음엔 숨김) */
-        #game-screen {
-            background-color: #333; /* 게임 배경 */
-            display: none; /* 핵심: 처음엔 안 보이게 설정 */
-        }
+.start-btn:hover {
+    transform: scale(1.1);
+    background-color: #fff176;
+}
 
-        /* (이전 질문의 코드) 스테이지 배너 스타일 */
-        .stage-banner {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.85);
-            color: #fff;
-            padding: 20px 60px;
-            border: 2px solid #ffd700;
-            border-radius: 15px;
-            font-size: 2rem;
-            font-weight: bold;
-            white-space: nowrap;
-            z-index: 9999;
-            pointer-events: none;
-            /* JS로 클래스를 추가할 때 애니메이션 실행 */
-            opacity: 0; /* 기본은 투명 */
-        }
+/* 스테이지 배너 스타일 */
+.stage-banner {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.85);
+    color: #ffd700;
+    padding: 25px 70px;
+    border: 3px solid #ffd700;
+    border-radius: 15px;
+    font-size: 2.5rem;
+    font-weight: bold;
+    white-space: nowrap;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0;
+}
 
-        /* 애니메이션 클래스 (JS에서 추가함) */
-        .animate-stage {
-            animation: slideLeftVanish 3s ease-in-out forwards;
-        }
+/* 애니메이션 클래스 */
+.animate-stage {
+    animation: slideLeftVanish 3s ease-in-out forwards;
+}
 
-        @keyframes slideLeftVanish {
-            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
-            10% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-            70% { transform: translate(-50%, -50%); opacity: 1; }
-            100% { transform: translate(-150vw, -50%) skewX(-20deg); opacity: 0; }
-        }
+@keyframes slideLeftVanish {
+    0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+    10% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    70% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(-150vw, -50%) skewX(-20deg); opacity: 0; }
+}
 
 *{ box-sizing:border-box; }
 html, body{ height:100%; }
