@@ -40,27 +40,6 @@ const uiTotal = document.getElementById("total");
 const uiScore = document.getElementById("score");
 const uiHint = document.getElementById("hint");
 
-// game.js 맨 윗부분 수정
-document.addEventListener('DOMContentLoaded', () => {
-    const startBtn = document.getElementById('start-btn');
-    const mainMenu = document.getElementById('main-menu');
-    // 아까 HTML에 추가한 game-container를 찾습니다.
-    const gameContainer = document.getElementById('game-container'); 
-
-    if (startBtn) {
-        startBtn.addEventListener('click', () => {
-            // 메뉴를 숨기고 게임 화면을 보여줍니다.
-            mainMenu.style.display = 'none';
-            gameContainer.style.display = 'block'; 
-
-            // 게임을 시작시킵니다.
-            if (typeof initGame === 'function') {
-                initGame();
-            }
-        });
-    }
-});
-
 // ====== utils ======
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 function overlap(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
@@ -1299,31 +1278,51 @@ async function runIntroAndStart(){
   });
 }
 
-// 기존 (async function boot(){...})() 를 통째로 지우고 이걸 넣으세요.
+ // ====== 최종 실행부 ======
+
+// 1. 화면 전환 및 초기화 함수
+async function startGame() {
+  // UI 요소가 있는지 확인 후 처리
+  const mainMenu = document.getElementById('main-menu');
+  const gameContainer = document.getElementById('game-container');
+
+  if (mainMenu) mainMenu.style.display = 'none';
+  if (gameContainer) gameContainer.style.display = 'block';
+
+  // 로딩/대화창 초기화
+  if (typeof close === 'function') {
+    close(overlay);
+    close(loading);
+    close(dialogue);
+  }
+
+  // 배경 및 플레이어 이미지 로드
+  await preloadStageBackgrounds();
+  player.image.src = resolveAsset("robot.png");
+
+  // 게임 시작 (ROBOT 아바타 데이터가 있는 INTRO_DIALOGUE 실행)
+  // dialogue.js에 있는 데이터를 그대로 쓰거나 아래처럼 직접 넣습니다.
+  openDialogue(
+    [
+      { speaker: "SYSTEM", text: "...신호 수신. 복구 시스템 온라인." },
+      { speaker: "ROBOT", text: "유닛 G-01 가동. 분석을 시작합니다." }
+    ],
+    async () => { 
+      await runIntroAndStart(); 
+    }
+  );
+
+  if (typeof render === 'function') render();
+}
+
+// 2. 버튼 클릭 이벤트 연결
 document.addEventListener('DOMContentLoaded', () => {
   const startBtn = document.getElementById('start-btn');
   if (startBtn) {
-    startBtn.onclick = async () => {
-      // 메뉴 숨기고 게임판 보이기
-      document.getElementById('main-menu').style.display = 'none';
-      // 만약 HTML에서 감싸는 div가 없다면 이 줄은 무시해도 되지만, 
-      // 화면이 겹치면 game-container를 display:block 하세요.
-
-      // 게임 초기화 및 첫 대사 시작
-      close(overlay);
-      close(loading);
-      close(dialogue);
-      await preloadStageBackgrounds();
-      player.image.src = resolveAsset("robot.png");
-
-      openDialogue(
-        [
-          { speaker: "SYSTEM", text: "...신호 수신. 복구 시스템 온라인." },
-          { speaker: "SYSTEM", text: "...유닛을 깨운다." },
-        ],
-        async () => { await runIntroAndStart(); }
-      );
-      render();
-    };
+    // 기존에 걸려있을지 모르는 이벤트를 초기화하고 새로 할당
+    startBtn.onclick = null; 
+    startBtn.onclick = startGame;
+  } else {
+    console.error("시작 버튼(#start-btn)을 찾을 수 없습니다.");
   }
 });
