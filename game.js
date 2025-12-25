@@ -58,29 +58,36 @@ stageRuleOverlay.innerHTML = `<span class="tag">RULE</span>${stage.ruleText}`;
 stageRuleOverlay.classList.add("is-on");
 }
 
-function showStageTitle(text) {
-    // 1. 기존 배너가 있다면 제거 (중복 방지)
-    const oldBanner = document.querySelector('.stage-banner');
-    if (oldBanner) {
-        oldBanner.remove();
-    }
+function startGame() {
+            // 1. 메인 메뉴 숨기기
+            const menu = document.getElementById('main-menu');
+            menu.style.display = 'none';
 
-    // 2. 새로운 배너 생성
-    const banner = document.createElement('div');
-    banner.classList.add('stage-banner');
-    banner.innerText = text;
-    
-    // 3. body에 추가
-    document.body.appendChild(banner);
+            // 2. 게임 화면 보여주기
+            const game = document.getElementById('game-screen');
+            game.style.display = 'flex'; // 혹은 block
 
-    // 4. 애니메이션이 끝나면(3초 후) DOM에서 완전히 제거 (메모리 관리)
-    setTimeout(() => {
-        banner.remove();
-    }, 3000); 
-}
+            // 3. 게임 시작 로직 실행 (스테이지 이름 띄우기)
+            showStageTitle("STAGE 1 - 시작의 숲");
+            
+            // 여기에 게임 루프 시작 함수 등을 넣으면 됩니다.
+            // example: gameLoop();
+        }
 
-// 사용 예시: 게임 시작 시 또는 스테이지 변경 시 호출
-showStageTitle("STAGE 2 - 어둠의 동굴");
+        function showStageTitle(text) {
+            // 배너 생성
+            const banner = document.createElement('div');
+            banner.classList.add('stage-banner');
+            banner.classList.add('animate-stage'); // 애니메이션 클래스 추가
+            banner.innerText = text;
+            
+            document.body.appendChild(banner);
+
+            // 3초 뒤 제거
+            setTimeout(() => {
+                banner.remove();
+            }, 3000); 
+        }
 
 // ====== loop control ======
 let running = false;
