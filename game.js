@@ -1267,47 +1267,45 @@ function render(){
 
 // ✅ 여기서부터 끝까지 붙여넣기
 
-// 1. 게임 시작 및 초기화 함수
-async function runIntroAndStart() {
-  resetAllGameState();
+// ====== 최종 실행부 (INTRO_DIALOGUE 연동 버전) ======
+
+async function startGame() {
+  console.log("게임 시작: INTRO_DIALOGUE 로드");
   
-  // 첫 대사 시작
-  openDialogue(
-    [
-      { speaker: "SYSTEM", text: "...신호 수신. 복구 시스템 온라인." },
-      { speaker: "ROBOT", text: "유닛 G-01 가동. 분석을 시작합니다." }
-    ],
-    async () => {
-      await showLoadingLine();
-      await beginStage(0, true);
-      setHint("←/→ 이동, Space 점프, E 심기, F 물주기, Q 재시작, R 카드발동, Shift AUTO");
-      renderOwnedCards();
-      if (!running) startLoop();
-    }
-  );
+  const mainMenu = document.getElementById('main-menu');
+  const gameContainer = document.getElementById('game-container');
+
+  // 1. 화면 전환
+  if (mainMenu) mainMenu.style.display = 'none';
+  if (gameContainer) gameContainer.style.display = 'block';
+
+  // 2. UI 및 상태 초기화
+  close(overlay);
+  close(loading);
+  close(dialogue);
+  resetAllGameState();
+
+  // 3. 리소스 로드
+  await preloadStageBackgrounds();
+  player.image.src = resolveAsset("robot.png");
+
+  // 4. ✅ 핵심: dialogue.js에서 가져온 INTRO_DIALOGUE를 바로 실행
+  openDialogue(INTRO_DIALOGUE, async () => {
+    // 대화가 모두 끝나면 실행될 콜백
+    await showLoadingLine();
+    await beginStage(0, true);
+    setHint("←/→ 이동, Space 점프, E 심기, F 물주기, Q 재시작, R 카드발동, Shift AUTO");
+    renderOwnedCards();
+    if (!running) startLoop();
+  });
+
+  if (typeof render === 'function') render();
 }
 
-// 2. 버튼 클릭 이벤트 (메인 메뉴 -> 게임 화면 전환)
+// 시작 버튼 연결
 document.addEventListener('DOMContentLoaded', () => {
   const startBtn = document.getElementById('start-btn');
   if (startBtn) {
-    startBtn.onclick = async () => {
-      // 화면 전환
-      const mainMenu = document.getElementById('main-menu');
-      const gameContainer = document.getElementById('game-container');
-      if (mainMenu) mainMenu.style.display = 'none';
-      if (gameContainer) gameContainer.style.display = 'block';
-
-      // 초기 UI 숨기기
-      close(overlay);
-      close(loading);
-      close(dialogue);
-
-      // 데이터 로드 후 시작
-      await preloadStageBackgrounds();
-      player.image.src = resolveAsset("robot.png");
-      
-      await runIntroAndStart();
-    };
+    startBtn.onclick = startGame;
   }
 });
