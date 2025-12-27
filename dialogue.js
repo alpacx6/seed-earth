@@ -24,7 +24,7 @@ export function stageEnterDialogue(stageIndex, stageName, ruleText){
   const s = stageIndex + 1;
   return [
     { speaker: "SYSTEM", text: `스테이지 ${s} 진입: ${stageName}` },
-    { speaker: "SYSTEM", text: `RULE: ${ruleText}' },
+    { speaker: "SYSTEM", text: `RULE: ${ruleText}` },
     { speaker: "ROBOT", text: "임무를 시작합니다." },
   ];
 }
