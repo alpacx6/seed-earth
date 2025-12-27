@@ -14,7 +14,6 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    background-color: #111; /* 배경색을 어둡게 해서 여백이 어색하지 않게 함 */
 }
 
 body {
