@@ -46,10 +46,11 @@ h1 {
     letter-spacing: 4px;        /* 글자 간격 */
     
     /* 2. 색상 설정 (그라데이션/투명 효과 완전 제거) */
-    color: #00022e;             /* 순수 검은색 */
+    color: #1A2A44;             /* 순수 검은색 */
     background: none;           /* 배경 효과 제거 */
     -webkit-text-fill-color: currentcolor; /* 투명화 방지 */
     text-shadow: none;          /* 그림자 제거 */
+    -webkit-text-stroke: 1px white
 
     /* 3. 위치 설정 */
     margin-top: -100px;         /* 더 위로 올리려면 숫자를 키우세요 (예: -200px) */
