@@ -40,7 +40,7 @@ body {
 
 h1 {
     margin-top: -100px;         /* 음수 값을 주면 위로 올라갑니다. 더 올리려면 숫자를 키우세요 */
-    margin-bottom: 100px;        /* 제목과 버튼 사이의 간격 */
+    margin-bottom: 200px;        /* 제목과 버튼 사이의 간격 */
     font-size: 4rem;
     margin-bottom: 40px;
     background: linear-gradient(to bottom, #476fff, #47ff63); /* 위는 흰색, 아래는 초록 */
