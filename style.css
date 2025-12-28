@@ -49,7 +49,6 @@ h1 {
     font-size: 4rem;
     margin-bottom: 40px;
     color: #000000; 
-    background: none; 
     -webkit-background-clip: initial;
     -webkit-text-fill-color: initial;
     -webkit-background-clip: text; /* 글자 모양대로 배경을 자름 */
