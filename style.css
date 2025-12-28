@@ -40,9 +40,9 @@ body {
 
 h1 {
     font-family: 'Orbitron', sans-serif;
-    font-size: 8rem;
+    font-size: 7rem;
     font-weight: 900;
-    letter-spacing: 4px;
+    letter-spacing: 6px;
     
     /* 🎨 여기에 원하는 색상 코드를 넣으세요 */
     color: #F0F9FF; 
@@ -62,7 +62,7 @@ h1 {
 
 .start-btn {
     position: absolute; 
-    bottom: 25%;
+    bottom: 30%;
     padding: 15px 50px;
     font-size: 1.5rem;
     font-weight: bold;
