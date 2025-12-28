@@ -545,7 +545,6 @@ font-weight: 850;
 }
 
 #main-menu {
-    background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2))
     position: fixed;
     top: 0; 
     left: 0;
@@ -553,7 +552,8 @@ font-weight: 850;
     height: 100vh;
     
     /* ✅ 회색 막(gradient)을 제거하고 이미지만 나오게 설정 */
-    background-image: url('./main_bg.png'); 
+    background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), 
+                url('./main_bg.png') no-repeat center center;
     background-repeat: no-repeat;
     background-position: center center;
     background-size: cover;
