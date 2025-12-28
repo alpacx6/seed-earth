@@ -46,7 +46,7 @@ h1 {
     letter-spacing: 4px;        /* 글자 간격 */
     
     /* 2. 색상 설정 (그라데이션/투명 효과 완전 제거) */
-    color: #292c6e;             /* 순수 검은색 */
+    color: #00022e;             /* 순수 검은색 */
     background: none;           /* 배경 효과 제거 */
     -webkit-text-fill-color: currentcolor; /* 투명화 방지 */
     text-shadow: none;          /* 그림자 제거 */
