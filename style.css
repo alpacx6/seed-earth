@@ -40,9 +40,9 @@ body {
 
 h1 {
     font-family: 'Orbitron', sans-serif;
-    font-size: 7rem;
+    font-size: 8rem;
     font-weight: 900;
-    letter-spacing: 6px;
+    letter-spacing: 8px;
     
     /* 🎨 여기에 원하는 색상 코드를 넣으세요 */
     color: #F0F9FF; 
@@ -51,8 +51,8 @@ h1 {
     text-shadow: 2px 2px 15px rgba(0, 150, 255, 0.6);
     -webkit-text-stroke: 1px #2563EB;
 
-    margin-top: -50px;
-    margin-bottom: 150px;
+    margin-top: 0px;
+    margin-bottom: 50px;
     
     /* 투명화 방지 설정 */
     background: none !important;
