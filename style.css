@@ -48,7 +48,7 @@ h1 {
     color: #F0F9FF; 
     
     /* 💡 팁: 글자가 배경에 묻힌다면 아래 한 줄만 추가해보세요 */
-    text-shadow: 2px 2px 15px rgba(0, 150, 255, 0.3);
+    text-shadow: 2px 2px 15px rgba(0, 150, 255, 0.6);
 
     margin-top: -100px;
     margin-bottom: 150px;
