@@ -50,7 +50,7 @@ h1 {
 
 .start-btn {
     position: absolute; 
-    bottom: 15%; /* 화면 맨 아래에서 15%만큼 위로 (로봇 발 위치에 맞춰 조절) */
+    bottom: 20%;
     padding: 15px 50px;
     font-size: 1.5rem;
     font-weight: bold;
