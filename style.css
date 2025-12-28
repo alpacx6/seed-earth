@@ -42,6 +42,7 @@ h1 {
     font-size: 4rem;
     text-shadow: 3px 3px 10px rgba(0,0,0,0.5);
     margin-bottom: 40px;
+    color: #000000;
 }
 
 .start-btn {
