@@ -43,7 +43,7 @@ h1 {
     margin-bottom: 200px;        /* 제목과 버튼 사이의 간격 */
     font-size: 4rem;
     margin-bottom: 40px;
-    background: linear-gradient(to bottom, #476fff, #47ff63); /* 위는 흰색, 아래는 초록 */
+    background: linear-gradient(to bottom, #476fff, #10c92c); /* 위는 흰색, 아래는 초록 */
     -webkit-background-clip: text; /* 글자 모양대로 배경을 자름 */
     -webkit-text-fill-color: transparent; /* 원래 글자색을 투명하게 해서 배경이 보이게 함 */
 }
@@ -543,6 +543,7 @@ font-weight: 850;
     left: 0;
     width: 100vw; 
     height: 100vh;
+    gap: 80px;
     
     /* ✅ 회색 막(gradient)을 제거하고 이미지만 나오게 설정 */
     background-image: url('./main_bg.png'); 
