@@ -545,7 +545,6 @@ font-weight: 850;
     left: 0;
     width: 100vw; 
     height: 100vh;
-    gap: 150px;
     
     /* ✅ 회색 막(gradient)을 제거하고 이미지만 나오게 설정 */
     background-image: url('./main_bg.png'); 
