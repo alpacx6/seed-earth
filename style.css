@@ -51,7 +51,7 @@ h1 {
     text-shadow: 2px 2px 15px rgba(0, 150, 255, 0.6);
     -webkit-text-stroke: 1px #2563EB;
 
-    margin-top: 0px;
+    margin-top: -50px;
     margin-bottom: 50px;
     
     /* 투명화 방지 설정 */
