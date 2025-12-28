@@ -41,9 +41,9 @@ body {
 h1 {
     /* 1. 폰트 스타일 */
     font-family: 'Orbitron', sans-serif;
-    font-size: 5.5rem;          /* 크고 시원하게 */
-    font-weight: 900;
-    letter-spacing: 6px;        /* 글자 간격 */
+    font-size: 4rem;          /* 크고 시원하게 */
+    font-weight: 700;
+    letter-spacing: 4px;        /* 글자 간격 */
     
     /* 2. 색상 설정 (그라데이션/투명 효과 완전 제거) */
     color: #000000;             /* 순수 검은색 */
