@@ -40,7 +40,6 @@ body {
 
 h1 {
     font-size: 4rem;
-    text-shadow: 3px 3px 10px rgba(0,0,0,0.5);
     margin-bottom: 40px;
     background: linear-gradient(to bottom, #69a5ff, #69ff8f); /* 위는 흰색, 아래는 초록 */
     -webkit-background-clip: text; /* 글자 모양대로 배경을 자름 */
