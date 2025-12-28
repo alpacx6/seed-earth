@@ -55,7 +55,7 @@ h1 {
     margin-bottom: 150px;
     
     /* 투명화 방지 설정 */
-    background: none;
+    background: none !important;
     -webkit-background-clip: initial;
     -webkit-text-fill-color: initial;
 }
