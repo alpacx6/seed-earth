@@ -39,20 +39,23 @@ body {
 
 
 h1 {
+    /* 1. 폰트 스타일 */
     font-family: 'Orbitron', sans-serif;
-    font-size: 5.5rem;          /* 크기를 더 키워 시원하게 */
+    font-size: 5.5rem;          /* 크고 시원하게 */
     font-weight: 900;
-    letter-spacing: 6px;       /* 글자 사이 간격을 넓혀 웅장하게 */
+    letter-spacing: 6px;        /* 글자 간격 */
     
-    margin-top: -100px;         /* 음수 값을 주면 위로 올라갑니다. 더 올리려면 숫자를 키우세요 */
-    margin-bottom: 0px;        /* 제목과 버튼 사이의 간격 */
-    font-size: 4rem;
-    margin-bottom: 40px;
-    color: #000000; 
-    -webkit-background-clip: initial;
-    -webkit-text-fill-color: initial;
-    -webkit-background-clip: text; /* 글자 모양대로 배경을 자름 */
-    -webkit-text-fill-color: transparent; /* 원래 글자색을 투명하게 해서 배경이 보이게 함 */
+    /* 2. 색상 설정 (그라데이션/투명 효과 완전 제거) */
+    color: #000000;             /* 순수 검은색 */
+    background: none;           /* 배경 효과 제거 */
+    -webkit-text-fill-color: currentcolor; /* 투명화 방지 */
+    text-shadow: none;          /* 그림자 제거 */
+
+    /* 3. 위치 설정 */
+    margin-top: -150px;         /* 더 위로 올리려면 숫자를 키우세요 (예: -200px) */
+    margin-bottom: 150px;       /* 버튼과의 간격을 확보 */
+    
+    display: block;             /* 레이아웃 안정화 */
 }
 
 .start-btn {
