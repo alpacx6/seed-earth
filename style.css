@@ -38,11 +38,6 @@ body {
 }
 
 
-#main-menu {
-    background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
-    z-index: 10;
-}
-
 h1 {
     font-size: 4rem;
     text-shadow: 3px 3px 10px rgba(0,0,0,0.5);
