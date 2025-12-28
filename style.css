@@ -48,7 +48,7 @@ h1 {
     margin-bottom: 0px;        /* 제목과 버튼 사이의 간격 */
     font-size: 4rem;
     margin-bottom: 40px;
-    background: linear-gradient(to bottom, #454bad, #47ad45); /* 위는 흰색, 아래는 초록 */
+    background: linear-gradient(to bottom, #454bad, #ffffff); /* 위는 흰색, 아래는 초록 */
     -webkit-background-clip: text; /* 글자 모양대로 배경을 자름 */
     -webkit-text-fill-color: transparent; /* 원래 글자색을 투명하게 해서 배경이 보이게 함 */
 }
