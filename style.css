@@ -44,6 +44,7 @@ h1 {
     background: linear-gradient(to bottom, #69a5ff, #69ff8f); /* 위는 흰색, 아래는 초록 */
     -webkit-background-clip: text; /* 글자 모양대로 배경을 자름 */
     -webkit-text-fill-color: transparent; /* 원래 글자색을 투명하게 해서 배경이 보이게 함 */
+    -webkit-text-stroke: 2px rgba(255, 255, 255, 0.3); /* 글자 외곽에 아주 얇은 흰색 선 */
 }
 
 .start-btn {
