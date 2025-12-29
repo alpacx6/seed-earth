@@ -3,6 +3,21 @@ import { baseStages7, rand } from "./stages.js";
 import { SPEAKERS, INTRO_DIALOGUE, END_DIALOGUE, stageEnterDialogue } from "./dialogue.js";
 
 const BASE_URL = new URL("./", import.meta.url); // ✅ 모든 경로를 여기 기준으로 안전하게
+// ====== plant & seed images ======
+const IMG = {
+  seed: new Image(),
+  plantSeed: new Image(),
+  plantGrow: new Image(),
+  plantDone: new Image(),
+};
+
+function loadPlantImages(){
+  IMG.seed.src      = resolveAsset("images/seed.png");
+  IMG.plantSeed.src = resolveAsset("images/plant_seed.png");
+  IMG.plantGrow.src = resolveAsset("images/plant_grow.png");
+  IMG.plantDone.src = resolveAsset("images/plant_done.png");
+}
+
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
