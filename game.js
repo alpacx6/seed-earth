@@ -1183,17 +1183,22 @@ function render(){
     }
   }
 
-  // seeds (simple)
-  ctx.fillStyle = "rgba(255,255,255,0.9)";
-  for (const s of seeds){
-    if (s.taken) continue;
-    ctx.beginPath();
-    ctx.arc(s.x+s.w/2, s.y+s.h/2, 9, 0, Math.PI*2);
-    ctx.fill();
-    ctx.fillStyle = "rgba(60,220,140,0.9)";
-    ctx.fillRect(s.x+10, s.y+8, 4, 12);
-    ctx.fillStyle = "rgba(255,255,255,0.9)";
+  // seeds
+  // seeds (image)
+for (const s of seeds){
+  if (s.taken) continue;
+
+  if (IMG.seed.complete){
+    ctx.drawImage(
+      IMG.seed,
+      s.x,
+      s.y,
+      s.w,
+      s.h
+    );
   }
+}
+
 
   // plots
   const time = performance.now()*0.004;
@@ -1303,6 +1308,8 @@ async function startGame() {
   // 3. 리소스 로드
   await preloadStageBackgrounds();
   player.image.src = resolveAsset("robot.png");
+  loadPlantImages();
+
 
   // 4. ✅ 핵심: dialogue.js에서 가져온 INTRO_DIALOGUE를 바로 실행
   openDialogue(INTRO_DIALOGUE, async () => {
