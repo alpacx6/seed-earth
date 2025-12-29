@@ -1201,26 +1201,73 @@ for (const s of seeds){
 
 
   // plots
-  const time = performance.now()*0.004;
-  for (const pl of plots){
-    ctx.fillStyle="rgba(20,16,10,0.65)";
-    ctx.fillRect(pl.x, pl.y, pl.w, pl.h);
+// ====== plots (심는 자리 + 식물 이미지) ======
+const time = performance.now() * 0.004;
 
-    const cx = pl.x + pl.w/2;
-    const cy = pl.y + pl.h/2;
+for (const pl of plots){
+  // 흙 바닥
+  ctx.fillStyle = "rgba(20,16,10,0.65)";
+  ctx.fillRect(pl.x, pl.y, pl.w, pl.h);
 
-    if (!pl.planted){
-      drawPulseRing(cx, cy, 16, time, "rgba(120,255,180,0.95)", "rgba(255,255,255,0.35)");
-    } else {
-      if (!pl.watered){
-        drawPulseRing(cx, cy, 18, time+0.6, "rgba(255,230,140,0.95)", "rgba(255,255,255,0.20)");
-        drawTextTag(pl.x-10, pl.y-12, "WATER (F)");
-      } else if (!pl.o2Given){
-        drawPulseRing(cx, cy, 18, time+1.0, "rgba(255,170,90,0.95)", "rgba(120,255,180,0.22)");
-        drawTextTag(pl.x-10, pl.y-12, "HOLD…");
-      }
+  const cx = pl.x + pl.w / 2;
+  const cy = pl.y + pl.h / 2;
+
+  // 🌱 식물 이미지 위치 (흙 위)
+  const imgX = cx - 16;
+  const imgY = pl.y - 32;
+
+  if (!pl.planted){
+    // 아직 안 심은 상태
+    drawPulseRing(
+      cx,
+      cy,
+      16,
+      time,
+      "rgba(120,255,180,0.95)",
+      "rgba(255,255,255,0.35)"
+    );
+
+  } else {
+    // 심은 상태 → 이미지 표시
+    let img = IMG.plantSeed;
+
+    if (pl.watered && !pl.o2Given) {
+      img = IMG.plantGrow;
+    }
+    if (pl.o2Given) {
+      img = IMG.plantDone;
+    }
+
+    if (img && img.complete){
+      ctx.drawImage(img, imgX, imgY, 32, 32);
+    }
+
+    // 기존 가이드 UI 유지
+    if (!pl.watered){
+      drawPulseRing(
+        cx,
+        cy,
+        18,
+        time + 0.6,
+        "rgba(255,230,140,0.95)",
+        "rgba(255,255,255,0.20)"
+      );
+      drawTextTag(pl.x - 10, pl.y - 12, "WATER (F)");
+
+    } else if (!pl.o2Given){
+      drawPulseRing(
+        cx,
+        cy,
+        18,
+        time + 1.0,
+        "rgba(255,170,90,0.95)",
+        "rgba(120,255,180,0.22)"
+      );
+      drawTextTag(pl.x - 10, pl.y - 12, "HOLD…");
     }
   }
+}
+
 
   // hazards
   for (const h of hazards){
